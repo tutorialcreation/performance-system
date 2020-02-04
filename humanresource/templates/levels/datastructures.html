@@ -1,0 +1,308 @@
+{% extends '_layout.html' %}
+
+{% block title %} {{ title }} {% endblock %}
+
+{% load crispy_forms_tags %}
+
+{% block navheader %}
+{% include 'includes/navheader_employee_app.html' %}
+{% endblock %}
+
+
+{% block stylesheet %}
+
+#override-start{
+background:none !important;
+top: 35% !important;
+right:13px;
+color:#000;
+font-size: 24px;
+
+}
+
+.alert-warning{
+background:#fd7b7b;
+}
+
+.alert-success {
+background-color: #82b72a;
+}
+
+.alert-success,.alert-warning{
+font-size:16px;
+}
+
+
+.sec{
+border:1px solid yellow;
+background:red;
+}
+
+.form-wrapper{
+-webkit-box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);
+box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);
+padding: 2%;
+background:#fff !important;
+padding-bottom:5%;
+}
+
+.btn-lg{
+padding:8px 30px;
+
+}
+
+
+.main-panel > .content {
+padding: 60px 15px;
+min-height: calc(100% - 123px);
+
+
+{% endblock %}
+
+{% block content %}
+
+{% include "_modal.html" %}
+<section class="content">
+    <section class="container-fluid">
+
+    <section class="row">
+        <section class="col col-sm-8 offset-sm-2">
+
+            {% if messages %}
+            {% for message in messages %}
+            <div {% if message.tags %} class="{{ message.tags}}" {% endif %}>
+                {{ message }}
+                <button type="button" class="close" id="override-start" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+        </section>
+    </section>
+    <div class="row">
+        <div class="col">
+
+            <div class="text-center table-description">
+                <h4 class="title-h3" style="color: #60a0b3 !important;
+    						text-shadow: 1px 0px rgba(0,0,0,0.11)">DATA TABLES</h4>
+            </div>
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="download-print-action text-right">
+                        Download Excel | Pdf | Print <!-- Work on pdf and excel and print -->
+
+                    </div>
+                </div>
+
+
+            <div class="row">
+                <div class="col-12 mb-3">
+                    <button class="create-level_structure btn btn-info" type="button" name="button">
+                        <span class="fa fa-plus mr-2"></span>Input Data
+                    </button>
+                    <br><br>
+                    <hr>
+                </div>
+                <div class="col-12 mb-3">
+                     {% if levels %}
+                    <table class="table">
+                        <thead>
+                         <tr>
+                            <th class="text-center" scope="col">Data Structure</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for level in levels %}
+                        {% if level.number_of_levels == 0 %}
+                        {% if forloop.counter %}
+                        <tr>
+                            <td class="text-center">
+                                {% if level.number_of_levels == 0%}
+                                {{level.name}} - To view / edit
+                                <a href="{% url 'dataStructureIndex' maplist_pk=level.maplist_id strategic_objective=level.name tree_pk=level.tree_id %}"><i>click
+                                    here</i></a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% endif %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p class="no-level_structures text-primary">No data added yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+    <!-- Pagination -->
+    <div class="pagination">
+							    <span class="step-links">
+							        {% if maps.has_previous %}
+							            <a href="?page=1">&laquo; first</a>
+							            <a href="?page={{ maps.previous_page_number }}">previous</a>
+							        {% endif %}
+
+							        <span class="current">
+							            Page {{ map.number }} of {{ map.paginator.num_pages }}.
+							        </span>
+
+							        {% if maps.has_next %}
+							            <a href="?page={{ maps.next_page_number }}">next</a>
+							            <a href="?page={{ maps.paginator.num_pages }}">last &raquo;</a>
+							        {% endif %}
+							    </span>
+    </div>
+    <!-- /pagination -->
+
+    </section>
+</section>
+
+{% endblock content %}
+
+{% block extrascripts %}
+<script type="text/javascript">
+    $(function () {
+      // Create level_structure button
+      $(".create-level_structure").modalForm({formURL: "{% url 'create_level_structure' %}"});
+
+      // Update level_structure buttons
+      $(".update-level_structure").each(function () {
+        $(this).modalForm({formURL: $(this).data('id')});
+      });
+
+      // Read level_structure buttons
+      $(".read-level_structure").each(function () {
+        $(this).modalForm({formURL: $(this).data('id')});
+      });
+
+      // Delete level_structure buttons
+      $(".delete-level_structure").each(function () {
+        $(this).modalForm({formURL: $(this).data('id')});
+      })
+
+      // Hide message
+      $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+        $(".alert").slideUp(500);
+      });
+
+    });
+
+    $.fn.extend({
+    treed: function (o) {
+
+      var openedClass = 'fa fa-minus mr-2';
+      var closedClass = 'fa fa-plus mr-2';
+
+      if (typeof o != 'undefined'){
+        if (typeof o.openedClass != 'undefined'){
+        openedClass = o.openedClass;
+        }
+        if (typeof o.closedClass != 'undefined'){
+        closedClass = o.closedClass;
+        }
+      };
+
+            //initialize each of the top levels
+            var tree = $(this);
+            var i; //we want to make the style available to all the ul element
+            tree.addClass("tree");
+            tree.find('li').has("ul").each(function () {
+                var branch = $(this); //li with children ul
+                branch.prepend("<i class='indicator " + closedClass + "'></i>");
+                branch.addClass('branch');
+                branch.on('click', function (e) {
+                    if (this == e.target) {
+                        var icon = $(this).children('i:first');
+                        icon.toggleClass(openedClass + " " + closedClass);
+                        $(this).children().children().toggle();
+                    }
+                })
+                branch.children().children().toggle();
+            });
+
+            //fire event from the dynamically added icon
+            tree.find('.branch .indicator').each(function(){
+                $(this).on('click', function () {
+                    $(this).closest('li').click();
+                });
+            });
+
+            //fire event to open branch if the li contains a button instead of text
+            tree.find('.branch>button').each(function () {
+                $(this).on('click', function (e) {
+                    $(this).closest('li').click();
+                        e.preventDefault();
+                });
+            });
+
+    }
+});
+
+//Initialization of treeviews
+
+$('.treediagram').treed();
+
+
+$('#tree2').treed({openedClass:'glyphicon-folder-open', closedClass:'glyphicon-folder-close'});
+
+$('#tree3').treed({openedClass:'glyphicon-chevron-right', closedClass:'glyphicon-chevron-down'});
+
+
+</script>
+{% endblock extrascripts %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

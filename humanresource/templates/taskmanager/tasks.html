@@ -1,0 +1,59 @@
+{% extends "_layout.html" %}
+
+{% block navheader %}
+{% include 'includes/navheader_employee_app.html' %}
+{% endblock %}
+
+{% block content %}
+  <h2 class="w3-card w3-padding-16">
+    {% if completed %}
+      Completed Tasks:
+    {% else %}
+      My Tasks:
+    {% endif %}
+  </h2>
+  <p>{{ tasks.count }} task(s) are found!</p>
+  {% if tasks %}
+    <table class="w3-table w3-striped w3-bordered w3-card-4 w3-hoverable">
+      <tr class="w3-green">
+        <th>Title</th>
+        <th>Team</th>
+        <th>Created By</th>
+        <th>Assigned to</th>
+        {% if not completed %}
+          <th>Due Date</th>
+          <th>Status</th>
+        {% else %}
+          <th>Completed Date</th>
+        {% endif %}
+      </tr>
+      {% for task in tasks %}
+        <tr>
+          <td><a href="{{ task.get_absolute_url }}">{{ task.title }}</a></td>
+          <td>
+            {% if task.team %}
+              <a href={{ task.team.get_absolute_url }}>{{ task.team }}</a>
+            {% else %}
+              ----
+            {% endif %}
+          </td>
+          <td>{{ task.creator }}</td>
+          <td>
+            <ul class="w3-ul" style="width:36%">
+              {% for u in task.assigned_to.all %}
+                <li><i>{{ u }}</i></li>
+              {% endfor %}
+            </ul>
+          </td>
+          {% if not completed %}
+            <td class="{% if task.is_overdated %}w3-red{% endif %}">{{ task.due_date }}</td>
+            <td>{{ task.get_status_display }}</td>
+          {% else %}
+            <td>{{ task.completed_date }}</td>
+          {% endif %}
+        </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
+
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends '_layout.html' %}
+
+{% block navheader %}
+{% include 'includes/navheader_employee_app.html' %}
+{% endblock %}
+
+{% block content %}
+  <h2>{{ found_tasks.count }} search results for : "{{ query_string }}"</h2>
+  {% if found_tasks %}
+    <table class="w3-table w3-striped w3-bordered w3-card-4 w3-hoverable">
+      <tr class="w3-green">
+        <th>Title</th>
+        <th>Team</th>
+        <th>Created By</th>
+        <th>Assigned to</th>
+        <th>Due Date</th>
+        <th>Status</th>
+        <th>Completed Date</th>
+      </tr>
+      {% for task in found_tasks %}
+        <tr>
+          <td><a href="{{ task.get_absolute_url }}">{{ task.title }}</a></td>
+          <td>
+            {% if task.team %}
+              <a href={{ task.team.get_absolute_url }}>{{ task.team }}</a>
+            {% else %}
+              ----
+            {% endif %}
+          </td>
+          <td>{{ task.creator }}</td>
+          <td>
+            <ul class="w3-ul" style="width:36%">
+              {% for u in task.assigned_to.all %}
+                <li><i>{{ u }}</i></li>
+              {% endfor %}
+            </ul>
+          </td>
+          <td>{{ task.due_date }}</td>
+          <td>{{ task.get_status_display }}</td>
+          <td>{{ task.completed_date }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
+
+{% endblock %}

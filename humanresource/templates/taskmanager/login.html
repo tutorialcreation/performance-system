@@ -1,0 +1,21 @@
+{% extends "taskmanager/base.html" %}
+
+{% block title %}
+  Login | Task Manager
+{% endblock %}
+
+{% block content %}
+
+<form method="post" action="" class="w3-container w3-card w3-margin-top">
+{% csrf_token %}
+<label for="username"><b>Username : </b></label>
+<input type="text" id="username" name="username" placeholder="Enter your username" class="w3-input w3-margin" maxlength="254" required autofocus>
+<label for="password"><b>Password : </b></label>
+<input type="password" id="password" name="password" placeholder="Enter your password" class="w3-input w3-margin" required>
+<input type="hidden" name="next" value="{{ next }}">
+
+<input type="submit" value="login" class="w3-button w3-green w3-margin w3-wide">
+
+</form>
+
+{% endblock %}
