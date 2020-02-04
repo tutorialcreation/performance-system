@@ -1,0 +1,261 @@
+{% extends '_layout.html' %}
+
+{% block title %} {{ title }} {% endblock %}
+
+{% load crispy_forms_tags %}
+{% load mptt_tags %}
+{% block navheader %}
+{% include 'includes/navheader_employee_app.html' %}
+{% endblock %}
+
+
+{% block stylesheet %}
+
+#override-start{
+background:none !important;
+top: 35% !important;
+right:13px;
+color:#000;
+font-size: 24px;
+
+}
+
+.alert-warning{
+background:#fd7b7b;
+}
+
+.alert-success {
+background-color: #82b72a;
+}
+
+.alert-success,.alert-warning{
+font-size:16px;
+}
+
+
+.sec{
+border:1px solid yellow;
+background:red;
+}
+
+.form-wrapper{
+-webkit-box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);
+box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);
+padding: 2%;
+background:#fff !important;
+padding-bottom:5%;
+}
+
+.btn-lg{
+padding:8px 30px;
+
+}
+
+
+.main-panel > .content {
+padding: 60px 15px;
+min-height: calc(100% - 123px);
+
+
+{% endblock %}
+
+<script>
+{% block jquery %}
+var endpoint = 'api/chart/data/'
+var labels = []
+var defaultData = []
+$.ajax({
+    method:"GET",
+    url:endpoint,
+    success:function(data){
+        labels = data.labels
+        defaultData = data.default
+        var ctx1 = document.getElementById('myChart1');
+        var ctx2 = document.getElementById('myChart2');
+        var ctx3 = document.getElementById('myChart3');
+        var ctx4 = document.getElementById('myChart4');
+var myChart = new Chart(ctx1, {
+    type: 'polarArea',
+    data: {
+        labels:labels,
+        datasets: [{
+            label: '# of Kpi',
+            data: defaultData,
+            backgroundColor: [
+                'rgba(248, 151, 52, 0.7)',
+                'rgba(70, 183, 84, 0.7)',
+                'rgba(34, 56, 67, 0.7)',
+                'rgba(68, 65, 64, 0.7)',
+                'rgba(248, 151, 52, 0.7)',
+                'rgba(70, 183, 84, 0.7)',
+            ],
+            borderColor: [
+                'rgba(248, 151, 52, 0.7)',
+                'rgba(70, 183, 84, 0.7)',
+                'rgba(34, 56, 67, 0.7)',
+                'rgba(68, 65, 64, 0.7)',
+                'rgba(248, 151, 52, 1)',
+                'rgba(70, 183, 84, 1)',
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero: true
+                }
+            }]
+        }
+    }
+});
+var myChart = new Chart(ctx2, {
+    type: 'bar',
+    data: {
+        labels:labels,
+        datasets: [{
+            label: '# of Kpi',
+            data: defaultData,
+            backgroundColor: [
+                'rgba(248, 151, 52, 0.7)',
+                'rgba(70, 183, 84, 0.7)',
+                'rgba(34, 56, 67, 0.7)',
+                'rgba(68, 65, 64, 0.7)',
+                'rgba(248, 151, 52, 0.7)',
+                'rgba(70, 183, 84, 0.7)',
+            ],
+            borderColor: [
+                'rgba(248, 151, 52, 0.7)',
+                'rgba(70, 183, 84, 0.7)',
+                'rgba(34, 56, 67, 0.7)',
+                'rgba(68, 65, 64, 0.7)',
+                'rgba(248, 151, 52, 1)',
+                'rgba(70, 183, 84, 1)',
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero: true
+                }
+            }]
+        }
+    }
+});
+var myChart = new Chart(ctx3, {
+    type: 'line',
+    data: {
+        labels:labels,
+        datasets: [{
+            label: '# of Kpi',
+            data: defaultData,
+            backgroundColor: [
+                'rgba(248, 151, 52, 0.7)',
+                'rgba(70, 183, 84, 0.7)',
+                'rgba(34, 56, 67, 0.7)',
+                'rgba(68, 65, 64, 0.7)',
+                'rgba(248, 151, 52, 0.7)',
+                'rgba(70, 183, 84, 0.7)',
+            ],
+            borderColor: [
+                'rgba(248, 151, 52, 0.7)',
+                'rgba(70, 183, 84, 0.7)',
+                'rgba(34, 56, 67, 0.7)',
+                'rgba(68, 65, 64, 0.7)',
+                'rgba(248, 151, 52, 1)',
+                'rgba(70, 183, 84, 1)',
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero: true
+                }
+            }]
+        }
+    }
+});
+var myChart = new Chart(ctx4, {
+    type: 'pie',
+    data: {
+        labels:labels,
+        datasets: [{
+            label: '# of Kpi',
+            data: defaultData,
+            backgroundColor: [
+                'rgba(248, 151, 52, 0.7)',
+                'rgba(70, 183, 84, 0.7)',
+                'rgba(34, 56, 67, 0.7)',
+                'rgba(68, 65, 64, 0.7)',
+                'rgba(248, 151, 52, 0.7)',
+                'rgba(70, 183, 84, 0.7)',
+            ],
+            borderColor: [
+                'rgba(248, 151, 52, 0.7)',
+                'rgba(70, 183, 84, 0.7)',
+                'rgba(34, 56, 67, 0.7)',
+                'rgba(68, 65, 64, 0.7)',
+                'rgba(248, 151, 52, 1)',
+                'rgba(70, 183, 84, 1)',
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero: true
+                }
+            }]
+        }
+    }
+});
+     },
+    error:function(error_data){
+        console.log("error")
+        console.log(error_data)
+    }
+})
+
+
+{% endblock %}
+
+
+
+
+
+
+
+</script>
+
+
+{% block content %}
+<div class="row">
+    <div class="col-sm-12" url-endpoint="{% url 'reports:api_data' %}">
+        <h2>PAMS REPORTS</h2>
+    </div>
+    <div class="col-sm-6">
+         <canvas id="myChart1" width="400" height="400"></canvas>
+    </div>
+    <div class="col-sm-6">
+        <canvas id="myChart2" width="400" height="400"></canvas>
+    </div>
+
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <canvas id="myChart3" width="400" height="400"></canvas>
+    </div>
+    <div class="col-sm-6">
+        <canvas id="myChart4" width="400" height="400"></canvas>
+    </div>
+</div>
+{% endblock content %}

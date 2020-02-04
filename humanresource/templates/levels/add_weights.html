@@ -1,0 +1,271 @@
+{% extends '_layout.html' %}
+{% load mathfilters %}
+{% block title %} {{ title }} {% endblock %}
+
+{% load crispy_forms_tags %}
+{% load widget_tweaks %}
+{% load mptt_tags %}
+
+{% block navheader %}
+{% include 'includes/navheader_employee_app.html' %}
+{% endblock %}
+
+
+{% block stylesheet %}
+
+#override-start{
+background:none !important;
+top: 35% !important;
+right:13px;
+color:#000;
+font-size: 24px;
+
+}
+
+.alert-warning{
+background:#fd7b7b;
+}
+
+.alert-success {
+background-color: #82b72a;
+}
+
+.alert-success,.alert-warning{
+font-size:16px;
+}
+
+
+.sec{
+border:1px solid yellow;
+background:red;
+}
+
+.form-wrapper{
+-webkit-box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);
+box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);
+padding: 2%;
+background:#fff !important;
+padding-bottom:5%;
+}
+
+.btn-lg{
+padding:8px 30px;
+
+}
+
+h3{
+color:orange;
+}
+.main-panel > .content {
+padding: 60px 15px;
+min-height: calc(100% - 123px);
+
+
+{% endblock %}
+
+{% block content %}
+
+{% include "_modal.html" %}
+<section class="content">
+    <section class="container-fluid">
+        <div class="row">
+            <div class="col-md-6">
+                <h3 style="font-family:'Asap',sans-serif;">Your guide towards Adding KpiWeights</h3>
+                <hr>
+
+                {% if filter %}
+                <form method="GET">
+                    {{filter.form|crispy}}
+                    <button type="submit" class="btn btn-success">Search</button>
+                </form>
+                {% endif %}
+                {% if filter_1 %}
+                <form method="GET">
+                    {{filter_1.form|crispy}}
+                    <button type="submit" class="btn btn-success">Search</button>
+                </form>
+                {% endif %}
+                {% if filter_2 %}
+                <form method="GET">
+                    {{filter_2.form|crispy}}
+                    <button type="submit" class="btn btn-success">Search</button>
+                </form>
+                {% endif %}
+
+                <ul class="root treediagram">
+                    {% recursetree levels %}
+                    {% if node.levelset_id != NULL and node.number_of_levels == 0  and node.pk == strategic_objectives %}
+
+                    <li style="color:orange;list-style-type:none;">
+                        <i class="pe-7s-bottom-arrow"></i>
+                        New Level <br>
+                        {% for object in filter.qs %}
+                        {% if forloop.first %}
+                        <strong>Search results:</strong>
+                        {{object.content}}<i class="pe-7s-angle-right"></i>{{object.final_weight}}%
+                        {% endif %}
+                        {% endfor%}
+                    </li>
+                    {% elif node.levelset_id != NULL and node.number_of_levels == 1 %}
+                    <li style="color:green;list-style-type:none;">
+                        <i class="pe-7s-bottom-arrow"></i>
+                        New Sub-level <br>
+                        {% for object in filter_1.qs %}
+                        {% if forloop.first %}
+                        <strong>Search results:</strong>
+                        {{object.content}}<i class="pe-7s-angle-right"></i>{{object.final_weight}}%
+                        {% endif %}
+                        {% endfor%}
+                    </li>
+                    {% elif node.levelset_id != NULL and node.number_of_levels == 2 %}
+                    <li style="color:green;list-style-type:none;">
+                        New Sub-sub-level <br>
+                        {% for object in filter_2.qs %}
+                        {% if forloop.first %}
+                        <strong>Search results:</strong>
+                        {{object.content}}<i class="pe-7s-angle-right"></i>{{object.final_weight}}%
+                        {% endif %}
+                        {% endfor%}
+                    </li>
+                    {% endif %}
+                    <li>
+                        <!--                        {% for object in datasets %}-->
+                        <!--                        {% if forloop.first %}-->
+                        <!--                        {{node.name}}<i class="pe-7s-angle-right"></i>{{object.0}}%-->
+                        <!--                        {% endif %}-->
+                        <!--                        {% endfor%}-->
+                        {{node.name}}
+                        {% if not node.is_leaf_node %}
+                        <ul class="children">
+                            {{children}}
+                        </ul>
+                        {% endif %}
+                    </li>
+                    {% endrecursetree %}
+                </ul>
+
+            </div>
+            <div class="col-md-6">
+                <h3 style="font-family:'Asap',sans-serif;">Please Add KpiWeights over here.</h3>
+                <hr>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <table class="table">
+                        {{form|crispy}}
+                        <input type="submit" class="btn btn-success" value="Add Weight"><br>
+                    </table>
+                    <hr>
+                </form>
+
+                <table class="table">
+                    <tr>
+                        <th>Data</th>
+                        <th>Weight</th>
+                        <th>Percentage</th>
+                    </tr>
+                    {% for object in datasets %}
+                    <tr>
+                        <td>{{object.1.content}}</td>
+                        <td>{{object.1.weight}}</td>
+                        <td>{{object.0}}%</td>
+                    </tr>
+                    {% endfor %}
+
+                    {% for object in percentage %}
+                    <tr>
+                        <td>{{object}}%</td>
+                    </tr>
+                    {% endfor %}
+
+                </table>
+                <p><strong>Totals:</strong> {{totals}}</p>
+                <hr>
+<!--                <h3>Search Results</h3>-->
+<!--                <table class="table">-->
+<!--                    <tr>-->
+<!--                        <th>Content</th>-->
+<!--                        <th>Weight</th>-->
+<!--                    </tr>-->
+<!--                    {% for weight in filter.qs %}-->
+<!--                    <tr>-->
+<!--                        <td>{{weight.content}}</td>-->
+<!--                        <td>{{weight.weight}}</td>-->
+<!--                    </tr>-->
+<!--                    {% endfor %}-->
+
+<!--                </table>-->
+
+            </div>
+        </div>
+
+
+    </section>
+
+</section>
+
+{% endblock content %}
+
+{% block extrascripts %}
+<script type="text/javascript">
+      $(function () {
+        $("#datetimepicker1").datetimepicker({
+            format: 'DD/MM/YYYY HH:mm',
+        });
+      });
+
+
+
+
+
+
+
+
+
+
+</script>
+{% endblock extrascripts %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

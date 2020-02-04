@@ -1,0 +1,57 @@
+{% load widget_tweaks %}
+<div class="modal-header">
+    <h3 class="modal-title">KPI Value Statistics</h3>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+
+<div class="modal-body">
+    <h4><strong>Individual and Group Statistics</strong></h4>
+    <hr>
+    {% for object in data %}
+    <ul>
+        <li>{{object.individual}} summation -- {{member_sum.value__sum|floatformat:3}}        </li>
+        <li>{{object.individual}} average --   {{member_average.value__avg|floatformat:3}}    </li>
+        {% for object in member_ranking %}
+        {% if object.pk  == key %}
+        <p>Ranking  -- > {{forloop.counter}} with a value of -->   {{object.value|floatformat:3}}  </p>
+        {% endif %}
+        {% endfor %}
+    </ul>
+    {% endfor %}
+    <h4><strong>Group Statistics</strong></h4>
+    <hr>
+    {% for object in data %}
+    <ul>
+        <li>{{object.group}}-- summation {{group_sum.value__sum|floatformat:3}}         </li>
+        <li>{{object.group}}-- average   {{group_average.value__avg|floatformat:3}}     </li>
+        <li>{{object.group}}-- rank ->>   {{group_ranking.value__sum|floatformat:3}} %   </li>
+    </ul>
+    {% endfor %}
+</div>
+<div class="modal-footer">
+    <button type="button" class="submit-btn btn btn-primary">Data</button>
+</div>
+<script>
+      $("#id_level").change(function () {
+      var url = $("#sublevelform").attr("data-sublevels-url");  // post the url of the `load_sublevels` view
+      var levelId = $(this).val();  // post the selected level ID from the HTML input
+
+      $.ajax({                       // initialize an AJAX request
+        url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load-sublevels/)
+        data: {
+          'level': levelId-1      // add the level id to the post parameters
+        },
+
+        success: function (data) {   // `data` is the return of the `load_sublevels` view function
+          $("#id_previous_level_names").html(data);  // replace the contents of the sublevel input with the data that came from the server
+          $("#id_previous_levels").html(data);
+        }
+      });
+
+
+    });
+
+
+</script>

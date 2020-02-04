@@ -1,0 +1,28 @@
+{% load widget_tweaks %}
+
+<div class="modal-header">
+  <h3 class="modal-title">Map List Details</h3>
+  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+
+<div class="modal-body">
+
+  <div class="">
+    Maptype Description:
+    {{ map_list.maptpye_name }}
+  </div>
+  <div class="">
+    Maptype Name:
+    {{ map_list.maplist_name }}
+  </div>
+   <div class="">
+    Map Description:
+    {{ map_list.maplist_description }}
+  </div>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+</div>
