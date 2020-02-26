@@ -1,0 +1,46 @@
+{% load widget_tweaks %}
+{% load mptt_tags %}
+
+<div class="modal-header">
+    <h3 class="modal-title">Check out KPI Types</h3>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+
+<div class="modal-body">
+    <ul class="root treediagram">
+        {% recursetree levels %}
+        {% if node.levelset_id != NULL and node.number_of_levels == 0 %}
+
+        <li style="color:orange;list-style-type:none;">
+            <i class="pe-7s-bottom-arrow"></i>
+            New Level <br>
+        </li>
+        {% elif node.levelset_id != NULL and node.number_of_levels == 1 %}
+        <li style="color:green;list-style-type:none;">
+            <i class="pe-7s-bottom-arrow"></i>
+            New Sub-level <br>
+        </li>
+        {% elif node.levelset_id != NULL and node.number_of_levels == 2 %}
+        <li style="color:green;list-style-type:none;">
+            New Sub-sub-level <br>
+        </li>
+        {% endif %}
+        <li>
+            {{node.name}}
+            {% if not node.number_of_levels == level.number_of_levels %}
+            <ul class="children">
+                {{children}}
+            </ul>
+            {% endif %}
+        </li>
+        {% endrecursetree %}
+    </ul>
+</div>
+
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-success"><a href="{% url 'add_kpi_weights' 0 %}">Add Weights</a></button>
+    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+</div>

@@ -1,0 +1,92 @@
+{% load widget_tweaks %}
+
+<form method="post" id="sublevelform" novalidate>
+    {% csrf_token %}
+
+    <div class="modal-header">
+        <h3 class="modal-title">Create Kpi Data</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+    <div class="modal-body">
+        <form action="" method="GET">
+            <div class="row">
+                <div class="col-lg-12">
+                    <label for="id_data">Data:</label>
+                    <select name="data" id="id_data" class="form-control" required>
+                        <option value="" selected>---------</option>
+                        {% for object in data_values_filter %}
+                        <option value="{{object.name}}">{{object.name}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-lg-6">
+                    <label>Value Dates</label>
+                    <button type="button" class="submit-btn btn btn-primary">Click Submit to view Value Dates</button>
+
+                </div>
+                <div class="col-lg-6">
+                    <label for="id_value_dates">Value Dates:</label>
+                    {%if matching_string %}
+                    <select name="value_dates" id="id_value_dates" class="form-control" required>
+<!--                        <option value="" selected>-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;</option>-->
+                        {% for object in date_data.value_dates %}
+                        <option value="{{object}}">{{object}}</option>
+                        {% endfor %}
+                    </select>
+                    {% endif %}
+
+                </div>
+            </div>
+        </form>
+
+        <div class="{% if form.non_field_errors %}invalid{% endif %} mb-2">
+            {% if matching_string %}
+            {% for error in form.non_field_errors %}
+            {{ error }}
+            {% endfor %}
+            {% endif %}
+        </div>
+
+        {% for field in form %}
+        <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {% render_field field class="form-control" placeholder=field.label %}
+            <div class="{% if field.errors %} invalid{% endif %}">
+                {% for error in field.errors %}
+                {% if matching_string == None %}
+                <p class="help-block">{{ error }}</p>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="submit-btn btn btn-primary">Submit to Database.</button>
+        </div>
+
+    </div>
+
+
+</form>
+<script>
+      $("#id_level").change(function () {
+      var url = $("#sublevelform").attr("data-sublevels-url");  // post the url of the `load_sublevels` view
+      var levelId = $(this).val();  // post the selected level ID from the HTML input
+
+      $.ajax({                       // initialize an AJAX request
+        url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load-sublevels/)
+        data: {
+          'level': levelId-1      // add the level id to the post parameters
+        },
+
+        success: function (data) {   // `data` is the return of the `load_sublevels` view function
+          $("#id_previous_level_names").html(data);  // replace the contents of the sublevel input with the data that came from the server
+          $("#id_previous_levels").html(data);
+        }
+      });
+    });
+</script>

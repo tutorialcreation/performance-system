@@ -1,0 +1,22 @@
+{% extends "_layout.html" %}
+
+{% block navheader %}
+{% include 'includes/navheader_employee_app.html' %}
+{% endblock %}
+
+{% block content %}
+  {% if user.is_authenticated %}
+    <h2 class="w3-card w3-padding-16 w3-light-grey">Your department:</h2><br />
+    <ul class="w3-ul w3-hoverable w3-card-4">
+        {% for team in teams %}
+          <li class="w3-bar">
+            <a href={{ team.get_absolute_url }} class="w3-bar-item">{{ team.name }}</a>
+          </li>
+        {% empty %}
+          <li class="w3-bar">You are not in any team</li>
+        {% endfor %}
+    </ul>
+  {% else %}
+    <h2>You are not loggedIn, please Login or signUp</h2>
+  {% endif %}
+{% endblock %}

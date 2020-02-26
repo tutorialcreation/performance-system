@@ -1,0 +1,35 @@
+{% extends "taskmanager/base.html" %}
+
+{% block title %}
+  SignUp | Task Manager
+{% endblock %}
+
+{% block content %}
+
+  <div class="w3-card w3-margin-top">
+    <form action="" method="post" class="w3-container">
+      {% csrf_token %}
+
+      {% for field in form %}
+        <div class="w3-margin">
+
+          {% for error in field.errors %}
+            <div class="w3-panel w3-pale-red w3-round-xlarge">
+              {{ error }}
+            </div>
+          {% endfor %}
+
+          <b>{{ field.label_tag }}</b>
+          {{ field }}
+          {% if field.help_text %}
+            <span class="w3-small">
+              {{ field.help_text }}
+            </span>
+          {% endif %}
+        </div>
+      {% endfor %}
+
+      <input type="submit" value="SignUp" class="w3-button w3-margin w3-wide w3-green">
+    </form>
+  </div>
+{% endblock %}

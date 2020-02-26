@@ -1,0 +1,44 @@
+{% extends '_layout.html' %}
+{% block navheader %}
+{% include 'includes/navheader_employee_app.html' %}
+{% endblock %}
+{% load static %}
+
+<html lang="en">
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="vapid-key" content="{{ vapid_key }}">
+    {% if user.id %}
+    <meta name="user_id" content="{{ user.id }}">
+    {% endif %}
+    <title>Web Push</title>
+    <link href="https://fonts.googleapis.com/css?family=PT+Sans:400,700" rel="stylesheet">
+    <!--    w3 css-->
+<!--    <link href="{% static 'taskmanager/style.css' %}" rel="stylesheet"/>-->
+</head>
+<body>
+<style>
+    .my_container{
+        margin-left:24px;
+        padding:40px;
+    }
+</style>
+<div class="my_container">
+    <form id="send-push__form">
+        <h3 class="header"><strong>Send a push notification</strong></h3>
+        <hr>
+        <p class="error"></p>
+        <input type="text" name="head" placeholder="Header: Your task  for today😍" class="form-control"><br><br>
+        <textarea name="body" id="" cols="30" rows="10" class="form-control"
+                  placeholder="Body: Carry the world on your shoulder. 😱😱😱"></textarea><br><br>
+        <button class="w3-button w3-green w3-margin w3-wide w3-left">Send Me</button>
+    </form>
+</div>
+
+</body>
+{% endblock %}
+</html>
+

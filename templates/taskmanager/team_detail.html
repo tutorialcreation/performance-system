@@ -1,0 +1,86 @@
+{% extends "_layout.html" %}
+
+{% block navheader %}
+{% include 'includes/navheader_employee_app.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="w3-card-4 w3-padding-16 w3-light-grey w3-margin-bottom w3-margin-top">
+  <div class="w3-margin-left">
+    <h2 class="">{{ team.name }}</h2>
+    {% if team.desc %}
+      <p>{{ team.desc|safe|linebreaks }}</p>
+    {% endif %}
+  </div>
+  {% if team.members.count == 1 %}
+    <div class="w3-margin">
+      Your team is empty.
+      <a href="{% url 'taskmanager:team_delete' team.id %}">
+        <button class="w3-button w3-red w3-margin">Delete Team</button>
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+<b>
+  Tasks assigned to team :
+</b>
+<p>{{ tasks.count }} task(s) are assigned to team!</p>
+{% if tasks %}
+  <table class="w3-table w3-striped w3-bordered w3-card-4 w3-hoverable">
+    <tr class="w3-green">
+      <th>Title</th>
+      <th>Assigned to</th>
+      <th>Due Date</th>
+      <th>Status</th>
+    </tr>
+    {% for task in tasks %}
+      <tr>
+        <td><a href="{{ task.get_absolute_url }}">{{ task.title }}</a></td>
+        <td>
+          <ul class="w3-ul" style="width:36%">
+            {% for u in task.assigned_to.all %}
+              <li><i>{{ u }}</i></li>
+            {% endfor %}
+          </ul>
+        </td>
+        <td class="{% if task.is_overdated %}w3-red{% endif %}">{{ task.due_date }}</td>
+        <td>{{ task.get_status_display }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+{% endif %}
+
+<div class="w3-margin-top">
+  <b><p>Members: </p></b>
+  <ul class="w3-ul w3-card-2">
+    {% for member in team.members.all %}
+      <li class="w3-bar">
+        <div class="w3-bar-item">
+          <span class="w3-large">{{ member }}</span>
+          {% if member == team.leader %}
+            <span class="w3-badge w3-green">leader</span>
+          {% endif %}
+        </div>
+        {% if user == team.leader and member != team.leader %}
+          <a href="{% url 'taskmanager:team_remove_member' team.id %}?username={{ member.username }}">
+            <span class="w3-bar-item w3-button w3-large w3-right" style="color:red">Remove</span>
+          </a>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+
+{# Members addition form #}
+{% if user == team.leader %}
+  <div class="w3-card w3-center w3-margin-top w3-row-padding">
+  <form method="get" action="{% url 'taskmanager:team_add_member' team.id %}" class="w3-container">
+    <p class="w3-margin-top">Add a user with username:</p>
+    <input class="w3-input w3-section" type="text" name="username" placeholder="Enter username of member to add" autocomplete="off" spellcheck="false" required>
+    <input type="submit" value="Add user" class="w3-button w3-wide w3-green w3-section">
+  </form>
+  </div>
+{% endif %}
+
+{% endblock %}

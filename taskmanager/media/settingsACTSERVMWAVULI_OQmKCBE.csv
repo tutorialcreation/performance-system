@@ -1,0 +1,8 @@
+Country,company,bod,SenionMngt,department,sub_dept,team,sub_team,miniteam
+Kenya,Actserv,ACTBOD,ACTSNR,Pensions,IAS,Team A,Team AA,Team AA
+Kenya,Actserv,ACTBOD,ACTSNR,Pensions,IAS,Team A,Team AB,Team AB
+Kenya,Actserv,ACTBOD,ACTSNR,Insurance,Val,TeamA,TeamAA,TeamAA
+Kenya,Actserv,ACTBOD,ACTSNR,Insurance,Product,TeamB,TeamAB,TeamAB
+Kenya,Mwavuli,MWABOD,MWASNR,Investments,Offshore,TeamA,TeamAA,TeamAA
+Kenya,Mwavuli,MWABOD,MWASNR,Investments,Local,TeamB,TeamAB,TeamAB
+Kenya,Mwavuli,MWABOD,MWASNR,Insurance,Insurance,TeamC,TeamAC,TeamAC

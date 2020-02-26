@@ -1,0 +1,214 @@
+{% load widget_tweaks %}
+<style>
+<style>
+     .item {
+      width: 33%;
+      margin: 2px 1% 2px 1%;
+      border: 0;
+    }
+
+    .item li {
+      list-style: none;
+    }
+
+    .scrollable-dropdown-list{
+      position: absolute;
+      max-height:200px;
+      width:33%;
+      overflow-y:scroll;
+      overflow-x:auto;
+      margin: 0;
+      padding-left: 1em;
+      border-style: solid;
+      border-width: thin;
+      border-color: grey;
+      background-color: white;
+    }
+
+    legend {
+      margin-bottom: 0;
+      font-size: 18px;
+    }
+
+    label {
+      font-weight: normal;
+      margin-left:20px;
+    }
+
+
+
+
+
+
+
+
+
+
+</style>
+<form method="post" id="sublevelform" data-specific-maplist-url="{% url 'ajax_specific_maplist_data' %}" novalidate>
+    {% csrf_token %}
+
+    <div class="modal-header">
+        <h3 class="modal-title">Create Level</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+    <div class="modal-body">
+
+        <div class="{% if form.non_field_errors %}invalid{% endif %} mb-2">
+            {% for error in form.non_field_errors %}
+            {{ error }}
+            {% endfor %}
+        </div>
+
+        {% for field in form %}
+        <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {% render_field field class="form-control" placeholder=field.label %}
+            <div class="{% if field.errors %} invalid{% endif %}">
+                {% for error in field.errors %}
+                <p class="help-block">{{ error }}</p>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+
+        {% if kpi_str %}
+        <div class="row">
+            <div class="col-lg-12">
+                <label>Value-Dates: Multiple date picker</label><br>
+                <div class="col">
+                    <input data-date-format="dd-mm-yyyy"  name="date_picker" id="datepicker" class="form-control"/>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <label>Value-Dates: range picker</label><br>
+                <div class="input-group input-daterange">
+                    <input type="text" class="form-control" name="date_range" value="2020-04-05"/>
+                    <div class="input-group-addon">to</div>
+                    <input type="text" class="form-control" name="date_range" value="2020-04-19"/>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <!--        <fieldset class="item toggle-item">-->
+    <!--            <div class="legend-container">-->
+    <!--                <legend>Choices</legend>-->
+    <!--            </div>-->
+    <!--            <ul class="scrollable-dropdown-list">-->
+    <!--                <li>-->
+    <!--                    <input type="checkbox" class="custom-control-input filter" id="choice_{{forloop.counter}}"-->
+    <!--                           name="choice" value="{{form.parent.value}}">-->
+    <!--                    <label for="choice_{{forloop.counter}}" class="custom-control-label">{{field.parent}}</label>-->
+    <!--                </li>-->
+    <!--            </ul>-->
+    <!--        </fieldset>-->
+    <!--        {% for number in '0123456789'|make_list %}-->
+    <!--        <div class="check_box" id="check_box_{{ number }}">-->
+    <!--            <input id="cb_{{ number }}" name="cb_{{ number }}" type="checkbox"><label for="cb_{{ number }}">-->
+    <!--            {{form.parent.value}}</label>-->
+    <!--        </div>-->
+    <!--        {% endfor %}-->
+
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="submit-btn btn btn-primary">Create</button>
+    </div>
+
+</form>
+<script>
+
+// AJAX functions
+          $("#id_maptype").change(function(){
+                 var url = $("#sublevelform").attr("data-specific-maplist-url"); // get the url of the specific maptype views
+                 var maptypeId = $(this).val();  //get the selected maptype id from the html input
+
+                 $.ajax({                          // initialize an ajax request
+                   url:url,                        // set the url of the request
+                   data:{
+                     'maptype_data': maptypeId     // add the maptype id to the get parameters
+                   },
+                   success: function (data){
+                     //console.log("print");                               // data is the return of the specific maptype view
+                     $("#id_maplist").html(data);  // replace contents of maptype with data that came from the server
+                    //console.log("passed");
+                   }
+                 });
+          });
+
+
+          $("#id_maplist").change(function () {
+                var url = $("#sublevelform").attr("data-specific-maplist-url");  // post the url of the `load_maplist_data` view
+                var maplistId = $(this).val();  // post the selected maplist ID from the HTML input
+
+                $.ajax({                       // initialize an AJAX request
+                  url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load/specific-maplist/)
+                  data: {
+                    'maplist_data': maplistId      // add the level id to the post parameters
+                  },
+
+                  success: function (data) {   // `data` is the return of the `load_sublevels` view function
+                    //console.log("print");
+                    $("#id_levelset").html(data);  // replace the contents of the sublevel input with the data that came from the server
+                  }
+                });
+          });
+
+          $("#id_levelset").change(function () {
+                var url = $("#sublevelform").attr("data-specific-maplist-url");  // post the url of the `load_maplist_data` view
+                var levelId = $(this).val();  // post the selected maplist ID from the HTML input
+
+                $.ajax({                       // initialize an AJAX request
+                  url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load/specific-maplist/
+                  data: {
+                    'level_data': levelId - 1     // add the level id to the post parameters
+                  },
+
+                  success: function (data) {   // `data` is the return of the `load_sublevels` view function
+                    $("#id_parent").html(data);  // replace the contents of the sublevel input with the data that came from the server
+                  }
+                });
+          });
+
+        $("#id_parent").change(function (e) {
+                e.preventDefault();
+          });
+
+
+      $("#datepicker").datepicker({
+        weekStart: 1,
+        daysOfWeekHighlighted: "6,0",
+        todayHighlight: true,
+        multidate: true
+      });
+      $("#datepicker").datepicker("setDate", new Date());
+
+
+    $(".input-daterange input").datepicker({
+        weekStart: 1,
+        daysOfWeekHighlighted: "6,0",
+        todayHighlight: true,
+      });
+      $(".input-daterange input").each(function() {
+        $(this).datepicker("clearDates");
+      });
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>

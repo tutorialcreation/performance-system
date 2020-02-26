@@ -1,0 +1,69 @@
+{% extends '_layout.html' %}
+{% block navheader %}
+{% include 'includes/navheader_employee_app.html' %}
+{% endblock %}
+
+{% block content %}
+<style>
+    ul li:hover{ background:white;}
+    /*ul li span:hover ul{ display: none;}
+    ul li ul li:last-child:hover .itam-2{display: block;}*/
+
+</style>
+<div class="w3-container w3-card w3-margin-top">
+    <form method="post" action="">
+        {% csrf_token %}
+        <ul style="list-style:none;">
+            <li style="text-align:left; margin-right: 0px;">
+                {% for field in form %}
+                <div class="w3-margin">
+
+                    {% for error in field.errors %}
+                    <div class="w3-panel w3-pale-red w3-round-xlarge">
+                        {{ error }}
+                    </div>
+                    {% endfor %}
+
+                    <b>{{ field.label_tag }}</b>
+                    {{ field }}
+                    {% if field.help_text %}
+                    <span class="w3-small">
+                {{ field.help_text }}
+              </span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+<!--No addition of other activities-->
+            </li>
+        </ul>
+
+        <input type="submit" value="{% if creation %}Create Task{% else %}Save Changes{% endif %}"
+               class="w3-button w3-green w3-margin w3-wide w3-right">
+        <a href="{%url 'view_push'%}" class="w3-button w3-green w3-margin w3-wide w3-left">Send a push notification</a>
+
+
+    </form>
+
+<!--    <button id="myBtn">&#43;</button>-->
+<!--    <button onclick="displaySub()">&#45;</button>-->
+    {% if not creation %}
+    <a href="{% url 'taskmanager:task_delete' task.id %}">
+        <button class="w3-button w3-red w3-margin w3-left">Delete Task</button>
+    </a>
+    {% endif %}
+
+</div>
+<script>
+document.getElementById("myBtn").addEventListener("click", displayAdd);
+
+function displayAdd() {
+    document.getElementById("myUL").style.display = "block";
+}
+function displaySub(){
+    document.getElementById("myUL").style.display = "none";
+}
+
+</script>
+
+{% endblock %}
+
