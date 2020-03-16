@@ -164,68 +164,16 @@ color: #9d9d9d;
                 {% for object in levels %}
                 {% if forloop.first %}
                 <li class="breadcrumb-item"><a href="{% url 'mapTypeIndex' %}">{{object.maptype}}</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'mapListIndex' object.maptype %}">{{object.maplist}}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'mapListIndex' object.maptype %}">{{object.maplist}}</a>
+                </li>
                 <li class="breadcrumb-item active" aria-current="page">{{object.name}}</li>
                 {% endif %}
                 {% endfor %}
                 <li class="breadcrumb-item"><a href="{% url 'kpiUserIndex' %}">Next Page</a></li>
             </ol>
         </nav>
-            <div class="col-md-6">
-                <h3 style="font-family:'Asap',sans-serif;">Please Add KpiWeights over here.</h3>
-                <hr>
 
-                <form method="POST">
-                    {% csrf_token %}
-                    <table class="table">
-                        {{form|crispy}}
-                        <input type="submit" class="btn btn-success" value="Add Weight"><br>
-                    </table>
-                    <hr>
-                </form>
-
-                <div class="table-responsive table-shadow">
-                <table class="table">
-                    <tr>
-                        <th>Data</th>
-                        <th>Weight</th>
-                        <th>Percentage</th>
-                    </tr>
-                    {% for object in datasets %}
-                    <tr>
-                        <td>{{object.1.content}}</td>
-                        <td>{{object.1.weight}}</td>
-                        <td>{{object.0}}%</td>
-                    </tr>
-                    {% endfor %}
-
-                    {% for object in percentage %}
-                    <tr>
-                        <td>{{object}}%</td>
-                    </tr>
-                    {% endfor %}
-
-                </table>
-                </div>
-                <p><strong>Totals:</strong> {{totals}}</p>
-                <hr>
-<!--                <h3>Search Results</h3>-->
-<!--                <table class="table">-->
-<!--                    <tr>-->
-<!--                        <th>Content</th>-->
-<!--                        <th>Weight</th>-->
-<!--                    </tr>-->
-<!--                    {% for weight in filter.qs %}-->
-<!--                    <tr>-->
-<!--                        <td>{{weight.content}}</td>-->
-<!--                        <td>{{weight.weight}}</td>-->
-<!--                    </tr>-->
-<!--                    {% endfor %}-->
-
-<!--                </table>-->
-
-            </div>
-            <div class="row margin-bottom">
+        <div class="row margin-bottom">
             <div class="col-md-6">
                 <h3 style="font-family:'Asap',sans-serif;">Search KpiWeights.</h3>
                 <hr>
@@ -260,62 +208,109 @@ color: #9d9d9d;
                 {% endfor%}
 
                 <div class="table-responsive table-shadow">
-                <ul class="root treediagram">
-                    {% recursetree levels %}
-                    {% if node.levelset_id != NULL and node.number_of_levels == 0  %}
+                    <ul class="root treediagram">
+                        {% recursetree levels %}
+                        {% if node.levelset_id != NULL and node.number_of_levels == 0 %}
 
-                    <li style="color:orange;list-style-type:none;">
-                        <i class="pe-7s-bottom-arrow"></i>
-                        New Level <br>
-                        {% for object in filter.qs %}
-                        {% if forloop.first %}
-                        <strong>Search results:</strong>
-                        {{object.content}}<i class="pe-7s-angle-right"></i>{{object.final_weight}}%
+                        <li style="color:orange;list-style-type:none;">
+                            <i class="pe-7s-bottom-arrow"></i>
+                            New Level <br>
+                            {% for object in filter.qs %}
+                            {% if forloop.first %}
+                            <strong>Search results:</strong>
+                            {{object.content}}<i class="pe-7s-angle-right"></i>{{object.final_weight}}%
+                            {% endif %}
+                            {% endfor%}
+                        </li>
+                        {% elif node.levelset_id != NULL and node.number_of_levels == 1 %}
+                        <li style="color:green;list-style-type:none;">
+                            <i class="pe-7s-bottom-arrow"></i>
+                            New Sub-level <br>
+                            {% for object in filter_1.qs %}
+                            {% if forloop.first %}
+                            <strong>Search results:</strong>
+                            {{object.content}}<i class="pe-7s-angle-right"></i>{{object.final_weight}}%
+                            {% endif %}
+                            {% endfor%}
+                        </li>
+                        {% elif node.levelset_id != NULL and node.number_of_levels == 2 %}
+                        <li style="color:green;list-style-type:none;">
+                            New Sub-sub-level <br>
+                            {% for object in filter_2.qs %}
+                            {% if forloop.first %}
+                            <strong>Search results:</strong>
+                            {{object.content}}<i class="pe-7s-angle-right"></i>{{object.final_weight}}%
+                            {% endif %}
+                            {% endfor%}
+                        </li>
                         {% endif %}
-                        {% endfor%}
-                    </li>
-                    {% elif node.levelset_id != NULL and node.number_of_levels == 1 %}
-                    <li style="color:green;list-style-type:none;">
-                        <i class="pe-7s-bottom-arrow"></i>
-                        New Sub-level <br>
-                        {% for object in filter_1.qs %}
-                        {% if forloop.first %}
-                        <strong>Search results:</strong>
-                        {{object.content}}<i class="pe-7s-angle-right"></i>{{object.final_weight}}%
-                        {% endif %}
-                        {% endfor%}
-                    </li>
-                    {% elif node.levelset_id != NULL and node.number_of_levels == 2 %}
-                    <li style="color:green;list-style-type:none;">
-                        New Sub-sub-level <br>
-                        {% for object in filter_2.qs %}
-                        {% if forloop.first %}
-                        <strong>Search results:</strong>
-                        {{object.content}}<i class="pe-7s-angle-right"></i>{{object.final_weight}}%
-                        {% endif %}
-                        {% endfor%}
-                    </li>
-                    {% endif %}
-                    <li>
-                        <!--                        {% for object in datasets %}-->
-                        <!--                        {% if forloop.first %}-->
-                        <!--                        {{node.name}}<i class="pe-7s-angle-right"></i>{{object.0}}%-->
-                        <!--                        {% endif %}-->
-                        <!--                        {% endfor%}-->
-                        {{node.name}}
-                        {% if not node.is_leaf_node %}
-                        <ul class="children">
-                            {{children}}
-                        </ul>
-                        {% endif %}
-                    </li>
-                    {% endrecursetree %}
-                </ul>
+                        <li>
+                            {{node.name}}
+                            {% if not node.is_leaf_node %}
+                            <ul class="children">
+                                {{children}}
+                            </ul>
+                            {% endif %}
+                        </li>
+                        {% endrecursetree %}
+                    </ul>
                 </div>
             </div>
+        <div class="col-md-6">
+            <h3 style="font-family:'Asap',sans-serif;">Please Add KpiWeights over here.</h3>
+            <hr>
+            <form method="POST" id="kpiforms" data-specific-kpi-url="{% url 'ajax_get_kpisets' %}" novalidate>
+                {% csrf_token %}
+                <table class="table">
+                    <label for="id_data_str">Data Structures:</label>
+                    <select name="data_str" id="id_data_str" class="form-control" required>
+                        <option value="">---------</option>
+                        {% for object in data_str%}
+                        <option value="{{object}}">{{object}}</option>
+                        {% endfor %}
+                    </select>
+                    <label for="id_kpi_set">Kpis:</label>
+                    <select name="kpi_set" id="id_kpi_set" class="form-control" required>
+                        <option value="">---------</option>
+                        {{kpi_data}}
+                        {% for object in kpi_data %}
+                        <option value="{{object}}" selected>{{object}}</option>
+                        {% endfor %}
+                    </select>
+                    {{form|crispy}}
 
+                    <input type="submit" class="btn btn-success" value="Add Weight"><br>
+                </table>
+                <hr>
+            </form>
+
+            <div class="table-responsive table-shadow">
+                <table class="table">
+                    <tr>
+                        <th>Data</th>
+                        <th>Weight</th>
+                        <th>Percentage</th>
+                    </tr>
+                    {% for object in datasets %}
+                    <tr>
+                        <td>{{object.1.content}}</td>
+                        <td>{{object.1.weight}}</td>
+                        <td>{{object.0}}%</td>
+                    </tr>
+                    {% endfor %}
+
+                    {% for object in percentage %}
+                    <tr>
+                        <td>{{object}}%</td>
+                    </tr>
+                    {% endfor %}
+
+                </table>
+            </div>
+            <p><strong>Totals:</strong> {{totals}}</p>
+            <hr>
         </div>
-
+        </div>
 
     </section>
 
@@ -324,25 +319,28 @@ color: #9d9d9d;
 {% endblock content %}
 
 {% block extrascripts %}
+
 <script type="text/javascript">
-      $(function () {
-        $("#datetimepicker1").datetimepicker({
-            format: 'DD/MM/YYYY HH:mm',
-        });
-      });
+        $("#id_data_str").change(function () {
+                var url = $("#kpiforms").attr("data-specific-kpi-url");  // post the url of the `load_maplist_data` view
+                var kpId = $(this).val();  // post the selected data-structure from the HTML input
 
+                $.ajax({                       // initialize an AJAX request
+                  url: url,                    // set the url
+                  data: {
+                    'data_str': kpId      // add the data-structure string to the post parameters
+                  },
 
-
-
-
-
-
-
+                  success: function (data) {   // `data` is the return of the `kpisets` view function
+                    //console.log("print");
+                    $("#id_kpi_set").html(data);  // replace the contents of kpi_set id ....
+                  }
+                });
+          });
 
 
 </script>
 {% endblock extrascripts %}
-
 
 
 

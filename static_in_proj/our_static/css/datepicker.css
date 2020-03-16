@@ -1,4 +1,4 @@
-.datepicker-trial---container {
+.datepicker---container {
   background-color: #fff;
   direction: ltr;
   font-size: 12px;
@@ -24,7 +24,7 @@
   }
 }
 
-.datepicker-trial---dropdown {
+.datepicker---dropdown {
   border: 1px solid #ccc;
   box-shadow: 0 3px 6px #ccc;
   box-sizing: content-box;
@@ -32,12 +32,12 @@
   z-index: 1;
 }
 
-.datepicker-trial---inline {
+.datepicker---inline {
   position: static;
 }
 
-.datepicker-trial---top-left,
-.datepicker-trial---top-right {
+.datepicker---top-left,
+.datepicker---top-right {
   border-top-color: #39f;
 
   &::before,
@@ -57,8 +57,8 @@
   }
 }
 
-.datepicker-trial---bottom-left,
-.datepicker-trial---bottom-right {
+.datepicker---bottom-left,
+.datepicker---bottom-right {
   border-bottom-color: #39f;
 
   &::before,
@@ -78,8 +78,8 @@
   }
 }
 
-.datepicker-trial---top-right,
-.datepicker-trial---bottom-right {
+.datepicker---top-right,
+.datepicker---bottom-right {
   &::before,
   &::after {
     left: auto;
@@ -87,7 +87,7 @@
   }
 }
 
-.datepicker-trial---panel {
+.datepicker---panel {
   & > ul {
     margin: 0;
     padding: 0;
@@ -183,6 +183,6 @@
   }
 }
 
-.datepicker-trial---hide {
+.datepicker---hide {
   display: none;
 }

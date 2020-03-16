@@ -1,6 +1,6 @@
 from django.db import models
 from pams_system.models.maps import MapList, MapType
-from pams_system.models.levels import InputData, MainLevel, Level
+from pams_system.models.levels import InputData, MainLevel, Level, KPIWeightings
 from django.contrib.auth.models import User
 from mptt.models import MPTTModel, TreeForeignKey
 from django.utils.translation import ugettext_lazy as _
@@ -86,31 +86,7 @@ class KpiParticipants(MainLevel, MPTTModel):
         order_insertion_by = ['individual']
 
 
-class KpiAssignee(MainLevel, MPTTModel):
-    YES = 'Y'
-    NO = 'N'
-    STATUS_CHOICES = (
-        (YES, 'Yes'),
-        (NO, 'No'),
-    )
-    status = models.CharField('Suspend Participant', max_length=255, choices=STATUS_CHOICES, default=NO)
-    individual = models.CharField(max_length=200, null=True)
-    is_suspended = models.BooleanField(_('Is Blocked'), help_text='button to toggle partcipant block and unblock',
-                                       default=False)
-    is_deleted = models.BooleanField(_('Is Deleted'), help_text='button to toggle participant deleted and undelete',
-                                     default=False)
-    parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True,
-                            related_name='children')
-    # levelset = models.ForeignKey(Level, on_delete=models.SET_NULL, null=True, blank=True)
-    kpi_assign = TreeForeignKey(InputData, on_delete=models.CASCADE, null=True, blank=True,
-                             related_name='kpi_assign', verbose_name='Datastructure:')
 
-    def __str__(self):
-        return self.individual
-
-    class MPTTMeta:
-        level_attr = 'participant_levels'
-        order_insertion_by = ['individual']
 
 class KpiGroupset(MainLevel, MPTTModel):
     group = models.CharField(max_length=128, null=True, unique=True)
@@ -132,6 +108,32 @@ class KpiGroupset(MainLevel, MPTTModel):
         level_attr = 'group_levels'
         order_insertion_by = ['group']
 
+class KpiAssignee(MainLevel, MPTTModel):
+    YES = 'Y'
+    NO = 'N'
+    STATUS_CHOICES = (
+        (YES, 'Yes'),
+        (NO, 'No'),
+    )
+    status = models.CharField('Suspend Participant', max_length=255, choices=STATUS_CHOICES, default=NO)
+    individual = models.ForeignKey(KpiParticipants,on_delete=models.SET_NULL,null=True,blank=True)
+    group = models.ForeignKey(KpiGroupset,on_delete=models.SET_NULL,null=True,blank=True)
+    is_suspended = models.BooleanField(verbose_name='Mark Check Box below to suspend:', help_text='button to toggle partcipant block and unblock',
+                                       default=False)
+    is_deleted = models.BooleanField(_('Is Deleted'), help_text='button to toggle participant deleted and undelete',
+                                     default=False)
+    parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True,
+                            related_name='children')
+    # levelset = models.ForeignKey(Level, on_delete=models.SET_NULL, null=True, blank=True)
+    kpi_assign = TreeForeignKey(InputData, on_delete=models.CASCADE, null=True, blank=True,
+                                related_name='kpi_assign', verbose_name='Datastructure:')
+
+    def __str__(self):
+        return self.individual
+
+    class MPTTMeta:
+        level_attr = 'participant_levels'
+        order_insertion_by = ['individual']
 
 
 class KpiAssignGroup(MainLevel, MPTTModel):
@@ -143,7 +145,7 @@ class KpiAssignGroup(MainLevel, MPTTModel):
                             related_name='children')
     levelset = models.ForeignKey(Level, on_delete=models.SET_NULL, null=True, blank=True, related_name="group_level")
     kpi_assign_group = TreeForeignKey(InputData, on_delete=models.CASCADE, null=True, blank=True,
-                               related_name='kpi_group_assign', verbose_name='Datastructure:')
+                                      related_name='kpi_group_assign', verbose_name='Datastructure:')
 
     # main_id = models.OneToOneField()
 
@@ -153,6 +155,7 @@ class KpiAssignGroup(MainLevel, MPTTModel):
     class MPTTMeta:
         level_attr = 'group_levels'
         order_insertion_by = ['group']
+
 
 #
 # class KpiGroups(models.Model):
@@ -171,7 +174,8 @@ class KpiMembership(models.Model):  # intermediate model
     effective_date_joined = models.DateField(null=True)
     # main_id = models.OneToOneField(KpiGroupset, on_delete=models.CASCADE, parent_link=True, related_name='kpi_member_main')
 
-class KpiMembers(MainLevel,models.Model):  # intermediate model
+
+class KpiMembers(MainLevel, models.Model):  # intermediate model
     individual = models.ForeignKey(KpiParticipants, on_delete=models.CASCADE)  # source models
     group = models.ForeignKey(KpiGroupset, on_delete=models.CASCADE)  # source models
     levelset = models.ForeignKey(Level, on_delete=models.SET_NULL, null=True, blank=True)
@@ -224,7 +228,7 @@ class KpiValues(models.Model):
     indicator = models.BooleanField(default=False)
     value = models.FloatField(null=True)
     value_date = models.ForeignKey(InputData, on_delete=models.SET_NULL, null=True, blank=True, related_name="inputs")
-    value_dates = models.DateField(null=True, blank=True)
+    # value_dates = models.DateField(null=True, blank=True)
     rank = models.FloatField(null=True)
 
     def __str__(self):
@@ -232,7 +236,7 @@ class KpiValues(models.Model):
 
 
 class KpiValueset(MainLevel, MPTTModel):
-    individual = models.ForeignKey(KpiIndividual, on_delete=models.SET_NULL, related_name='kpi_ind_val',
+    individual = models.ForeignKey(KpiParticipants, on_delete=models.SET_NULL, related_name='kpi_ind_val',
                                    verbose_name='Participants', null=True, blank=True)
     group = models.ForeignKey(KpiGroupset, on_delete=models.SET_NULL, related_name='kpi_group_val', null=True,
                               blank=True)
@@ -242,6 +246,8 @@ class KpiValueset(MainLevel, MPTTModel):
     levelset = models.ForeignKey(Level, on_delete=models.SET_NULL, null=True, blank=True)
     value = models.FloatField(null=True)
     kpi_val = models.ForeignKey(InputData, on_delete=models.SET_NULL, null=True, blank=True, related_name="kpi_val")
+    kpi_weight = models.ForeignKey(KPIWeightings, on_delete=models.SET_NULL, null=True, blank=True,
+                                   related_name="weightings")
     value_dates = models.DateField(null=True, blank=True)
     rank = models.FloatField(null=True)
 
@@ -251,3 +257,18 @@ class KpiValueset(MainLevel, MPTTModel):
     class MPTTMeta:
         level_attr = 'kpi_level'
         order_insertion_by = ['individual']
+
+
+class KpiStats(models.Model):
+    data_str = models.CharField(max_length=200,null=True,blank=True)
+    kpis = models.CharField(max_length=200, null=True, blank=True)
+    weights = models.FloatField(null=True)
+    value = models.IntegerField(null=True)
+    individual = models.CharField(max_length=200, null=True, blank=True)
+    group = models.CharField(max_length=200, null=True, blank=True)
+    value_date = models.DateField(null=True)
+    contribution_to_performance = models.FloatField(null=True)
+
+    def __str__(self):
+        return self.kpis
+

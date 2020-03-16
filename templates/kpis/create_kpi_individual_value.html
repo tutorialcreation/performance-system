@@ -1,92 +1,157 @@
 {% load widget_tweaks %}
 
-<form method="post" id="sublevelform" novalidate>
+<form method="post" id="sublevelform" data-specific-kpi-url="{% url 'ajax_specific_kpi' %}" novalidate>
+    <!--<form action="" method="POST">-->
     {% csrf_token %}
-
     <div class="modal-header">
-        <h3 class="modal-title">Create Kpi Data</h3>
+        <h3 class="modal-title">Input Individual Data.</h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
-
     <div class="modal-body">
-        <form action="" method="GET">
-            <div class="row">
-                <div class="col-lg-12">
-                    <label for="id_data">Data:</label>
-                    <select name="data" id="id_data" class="form-control" required>
-                        <option value="" selected>---------</option>
-                        {% for object in data_values_filter %}
-                        <option value="{{object.name}}">{{object.name}}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-lg-6">
-                    <label>Value Dates</label>
-                    <button type="button" class="submit-btn btn btn-primary">Click Submit to view Value Dates</button>
 
-                </div>
-                <div class="col-lg-6">
-                    <label for="id_value_dates">Value Dates:</label>
-                    {%if matching_string %}
-                    <select name="value_dates" id="id_value_dates" class="form-control" required>
-<!--                        <option value="" selected>-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;</option>-->
-                        {% for object in date_data.value_dates %}
-                        <option value="{{object}}">{{object}}</option>
-                        {% endfor %}
-                    </select>
-                    {% endif %}
-
-                </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <label for="id_content">Data:</label>
+                <select name="content_set" id="id_content" class="form-control" required>
+                    <option value="" selected>---------</option>
+                    {% for object in data_values_filter %}
+                    <option value="{{object.name}}" name="kpis">{{object.name}}</option>
+                    {% endfor %}
+                </select>
+                <hr>
             </div>
-        </form>
-
-        <div class="{% if form.non_field_errors %}invalid{% endif %} mb-2">
-            {% if matching_string %}
-            {% for error in form.non_field_errors %}
-            {{ error }}
-            {% endfor %}
-            {% endif %}
         </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <label for="id_kpi">Kpis:</label>
+                <!--                    {%if matching_string %}-->
+                <select name="kpi" id="id_kpi" class="form-control" required>
+                    <option value="56" selected>---------</option>
+                    {% for object in weight_data.final_weight %}
+                    <option value="{{object}}">{{object}}</option>
+                    {% endfor %}
+                </select>
+                <!--                    {% endif %}-->
+            </div>
+        </div>
+        <!--        {{ date_data }}-->
+        <div class="row">
+            <div class="col-lg-12">
+                <label for="id_values">Value Dates:</label>
 
-        {% for field in form %}
-        <div class="form-group">
-            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-            {% render_field field class="form-control" placeholder=field.label %}
-            <div class="{% if field.errors %} invalid{% endif %}">
-                {% for error in field.errors %}
-                {% if matching_string == None %}
-                <p class="help-block">{{ error }}</p>
+                <!--                    {%if matching_string %}-->
+                <select name="values" id="id_values" class="form-control" required>
+                    <option value="2019-05-02">---------</option>
+
+                    <option value="{{object}}">{{object}}</option>
+
+                </select>
+                <!--                    {% endif %}-->
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <label for="id_weight">Weight Data:</label>
+                <!--                    {%if matching_string %}-->
+                <select name="weight" id="id_weight" class="form-control" required>
+                    <option value="56" selected>---------</option>
+                    {% for object in weight_data.final_weight %}
+                    <option value="{{object}}">{{object}}</option>
+                    {% endfor %}
+                </select>
+                <!--                    {% endif %}-->
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                {%if individual_checker %}
+                <label for="id_ind">Participants Data:</label>
+                <select name="ind" id="id_ind" class="form-control" required>
+                    <option value="56" selected>---------</option>
+                    {% for object in individuals_values_filter %}
+                    <option value="{{object}}">{{object.individual}}</option>
+                    {% endfor %}
+                </select>
                 {% endif %}
-                {% endfor %}
             </div>
         </div>
-        {% endfor %}
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="submit-btn btn btn-primary">Submit to Database.</button>
+        <div class="row">
+            <div class="col-lg-12">
+                {%if group_checker %}
+                <label for="id_grouping">Group_Sets:</label>
+                <select name="grouping" id="id_grouping" class="form-control" required>
+                    <option value="56" selected>---------</option>
+                    {% for object in group_values_filter %}
+                    <option value="{{object}}">{{object.group}}</option>
+                    {% endfor %}
+                </select>
+                {% endif %}
+            </div>
         </div>
 
+        <label for="id_value_sets">ValueSet:</label>
+        <input type="number" name="value_set" id="id_value_sets" class="form-control"/>
     </div>
-
-
+    <div class="modal-footer">
+        <button type="button" class="submit-btn btn btn-primary">Submit to Database.</button>
+    </div>
 </form>
 <script>
-      $("#id_level").change(function () {
-      var url = $("#sublevelform").attr("data-sublevels-url");  // post the url of the `load_sublevels` view
-      var levelId = $(this).val();  // post the selected level ID from the HTML input
 
+    $("#id_content").change(function () {
+      var url = $("#sublevelform").attr("data-specific-kpi-url");;  // post the url of the `load_sublevels` view
+      var levelId = $(this).val();  // post the selected level ID from the HTML input
       $.ajax({                       // initialize an AJAX request
         url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load-sublevels/)
         data: {
-          'level': levelId-1      // add the level id to the post parameters
+          'kpi_val': levelId     // add the level id to the post parameters
         },
 
+
         success: function (data) {   // `data` is the return of the `load_sublevels` view function
-          $("#id_previous_level_names").html(data);  // replace the contents of the sublevel input with the data that came from the server
-          $("#id_previous_levels").html(data);
+          console.log(data);
+          $("#id_kpi").html(data);  // replace the contents of the sublevel input with the data that came from the server
         }
       });
     });
+
+    $("#id_kpi").change(function () {
+      var url = $("#sublevelform").attr("data-specific-kpi-url");;  // post the url of the `load_sublevels` view
+      var levelId = $(this).val();  // post the selected level ID from the HTML input
+      $.ajax({                       // initialize an AJAX request
+        url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load-sublevels/)
+        data: {
+          'kpi_date': levelId     // add the level id to the post parameters
+        },
+
+
+        success: function (data) {   // `data` is the return of the `load_sublevels` view function
+          console.log(data);
+          $("#id_values").html(data);  // replace the contents of the sublevel input with the data that came from the server
+        }
+      });
+    });
+
+
+    $("#id_kpi").change(function () {
+      var url = $("#sublevelform").attr("data-specific-kpi-url");;  // post the url of the `load_sublevels` view
+      var levelId = $(this).val();  // post the selected level ID from the HTML input
+      $.ajax({                       // initialize an AJAX request
+        url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load-sublevels/)
+        data: {
+          'weight': levelId     // add the level id to the post parameters
+        },
+
+
+        success: function (data) {   // `data` is the return of the `load_sublevels` view function
+          console.log(data);
+          $("#id_weight").html(data);  // replace the contents of the sublevel input with the data that came from the server
+        }
+      });
+    });
+
+
+
 </script>

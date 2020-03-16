@@ -21,11 +21,15 @@ from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from webpush import send_user_notification
+from setup import celery_app
 
 from taskmanager.models import Team, Task, Comment
 from taskmanager.forms.taskforms import TaskCreationForm, TaskEditForm
 from django.urls import reverse, reverse_lazy
 
+@celery_app.task(name="test-celery")
+def test_celery():
+    print("working >>>>>>>>>>>>>>>")
 
 @login_required
 @require_http_methods(["GET", "POST"])

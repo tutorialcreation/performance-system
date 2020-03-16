@@ -45,7 +45,7 @@ class KpiUserForm(BSModalForm, forms.ModelForm):
 class KpiAssignForm(BSModalForm, forms.ModelForm):
     class Meta:
         model = KpiAssignee
-        fields = [ 'kpi_assign','individual']
+        fields = [ 'kpi_assign','individual','is_suspended']
 
     # kpi_assign = MultipleChoiceTreeField(
     #     label=_("Assign Data Structure"),
@@ -98,6 +98,12 @@ class KpiAssignGroupForm(BSModalForm, forms.ModelForm):
     class Meta:
         model = KpiAssignGroup
         fields = ['maptype', 'maplist', 'group']
+
+class GroupAssignedForm(BSModalForm, forms.ModelForm):
+    class Meta:
+        model = KpiAssignee
+        fields = ['kpi_assign', 'group']
+
 
 class KpiMembershipForm(BSModalForm):
     class Meta:

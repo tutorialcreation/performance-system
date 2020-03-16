@@ -27,11 +27,17 @@ DEBUG = True
 ALLOWED_HOSTS = ['127.0.0.1', 'b2e0b134.ngrok.io', ]
 
 # Email Settings
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'edward.mike.anaryo@gmail.com'  # test
-EMAIL_HOST_PASSWORD = 'yencommerce'  # test
-EMAIL_PORT = 587
+EMAIL_HOST = os.getenv('EMAIL_HOST', '')
+EMAIL_PORT = os.getenv('EMAIL_PORT', '')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD','')
+# EMAIL_USE_SSL = True
 EMAIL_USE_TLS = True
+EMAIL_SENDER = 'noreply@actserv.com'
+EMAIL_BACKEND ='django.core.mail.backends.smtp.EmailBackend'
+
+
 BOOTSTRAP3 = {
     'javascript_in_head': True,
 }
@@ -106,15 +112,12 @@ WSGI_APPLICATION = 'setup.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'db_achievement',
-        'USER': 'martin.db_achievement',
-        'PASSWORD': 'db_achievement@6991-',
-        'HOST': 'localhost',
-        'PORT': 3306,
-        'OPTIONS': {
-            "init_command": "SET foreign_key_checks = 0;",
-        }
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.getenv('DB_NAME', ''),
+        'PASSWORD': os.getenv('DB_PASSWORD', ''),
+        'HOST': os.getenv('DB_HOST', ''),
+        'USER': os.getenv('DB_USER', ''),
+        'PORT': '5432',
     }
 }
 
@@ -185,3 +188,10 @@ MEDIA_URL = '/media/'
 
 # MEDIA FILES WILL BE SERVED FROM STATIC_CDN WHEN WE ARE LIVE
 MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'static_cdn', 'media_root')
+
+
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', '')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', '')
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'

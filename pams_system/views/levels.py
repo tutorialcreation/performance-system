@@ -1,13 +1,16 @@
 import datetime
+import itertools
 from django.db.models import Q, F, Sum, Avg, Count
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.views import generic
 from django.http import HttpResponse, JsonResponse
 from django.forms import modelformset_factory
+from dateutil.parser import parse
 # from django_pandas.io import read_frame
 from django.utils import timezone
 from pams_system.filters import WeightFilter
+from pams_system.utils.search_algorithms import get_kpis
 
 from bootstrap_modal_forms.generic import (
     BSModalCreateView,
@@ -21,20 +24,37 @@ from pams_system.forms.levelforms import (LevelStructureForm, LevelListForm, Lev
 from pams_system.models.maps import MapType, MapList
 from pams_system.models.levels import InputData, Level, KPIWeight, KPIWeightings
 
-
 #########################
 ### class-based views ###
 #########################
 
+from setup import celery_app
+
+
+@celery_app.task(name="test-celery-2")
+def test_celery():
+    print("test working >>>>>>>>>>>>>")
+
 
 # in the class below we will initialize the form
 # using this class based view
+from celery.schedules import crontab
+
+celery_app.conf.beat_schedule = {
+    # Execute every three hours.
+    'add-after-two-minutes': {
+        'task': 'test-celery-2',
+        'schedule': crontab(minute=0, hour=0),
+    },
+}
+
 
 # This class based view is aimed at filtering the data
 # based on the id and therefore we shall use the data from previous class
 class LevelStructureIndex(generic.ListView):
     model = InputData
     template_name = 'levels/datastructures.html'
+    test_celery.delay()
 
     # bread_crumbs = InputData.get_levels.all()
 
@@ -53,6 +73,7 @@ class LevelStructureIndex(generic.ListView):
         # Add in the publisher
         # context['breadcrumbs'] = self.bread_crumbs.all()[:1]
         context['levels'] = self.maplist
+        # print(len(self.maplist))
         context['choices'] = InputData.objects.all()
         return context
 
@@ -80,8 +101,8 @@ class DataStructure(generic.ListView):
 
     def get_context_data(self, **kwargs):
         # adding nodes into the tree structure
-        new_node = self.model(name='Workers')
-        parent = self.model.objects.get(name='Actval Life System')
+        # new_node = self.model(name='Workers')
+        # parent = self.model.objects.get(name='Actval Life System')
         # inserting the node
         # self.model.objects.insert_node(new_node, parent, position='last-child', save=True)
         # new_node.insert_at(parent, position='first-child', save=True)
@@ -126,11 +147,21 @@ class KpiStructureCreateView(BSModalCreateView, generic.FormView):
         context['dates'] = self.request.GET.get('dates')
         return context
 
-    def form_valid(self, form):
-        form.save()
-        # print(form)
+    def post(self, request, *args, **kwargs):
+        maptype = self.request.POST.get('maptype')
+        maplist = self.request.POST.get('maplist')
+        levelset = self.request.POST.get('levelset')
+        parent = self.request.POST.get('parent')
+        kpis = self.request.POST.get('kpis')
+        value_date = self.request.POST.get('process_date')
+        parsed_dates = [parse(d).date() for d in value_date.split(",")]
+        # import pdb; pdb.set_trace()
+
+        InputData.objects.update_or_create(name=kpis, maptype_id=maptype, maplist_id=maplist, levelset_id=levelset,
+                                           parent_id=parent, kpis=kpis, value_date=parsed_dates)
+        data_check = MapList.objects.get(maplist_id=int(self.request.POST.get('maplist')))
         return redirect(reverse("levelStructureIndex", kwargs={
-            'maplist': form.instance.maplist
+            'maplist': data_check.maplist_name
         }))
 
 
@@ -168,7 +199,7 @@ class LevelStructureReadView(BSModalUpdateView, generic.FormView):
 
     def form_valid(self, form):
         weights = self.request.POST('kpi_weights')
-        print(weights)
+        # print(weights)
         form.save()
         return redirect(reverse("dataStructureIndex", kwargs={
             'maplist_pk': form.instance.maplist_id,
@@ -201,6 +232,11 @@ class LevelStructureDeleteView(BSModalDeleteView, generic.FormView):
 class LevelReadView(BSModalReadView, generic.FormView):
     model = Level
     template_name = 'level/read_level.html'
+
+    # from setup import  celery_app
+    # @celery_app.task(name="test-celery-2")
+    # def test_celery(self):
+    #     print("test working >>>>>>>>>>>>>")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -303,8 +339,9 @@ def specific_maplist(request):
     context['maptypes'] = MapList.objects.filter(
         Q(maptype_name_id=maptype_id))  # match the collected maplist_id and maplist
     context['levelset'] = Level.objects.filter(Q(maplist_id=maplist_id))  # match the collected maplist_id and maplist
-    if levelset_id and not maplist_id:
-        context['data_str'] = InputData.objects.filter(Q(levelset_id=levelset_id))  # match the collected maplist_id and maplist
+    # if levelset_id and not maplist_id:
+    #     context['data_str'] = InputData.objects.filter(
+    #         Q(levelset_id=int(levelset_id)))  # match the collected maplist_id and maplist
     # then present the data for that specific maplist
     # import pdb; pdb.set_trace()
     return render(request, template_name, context)
@@ -338,95 +375,167 @@ def castToList(x):  # casts x to a list
         return [x]
 
 
-def add_weights(request, pk):
+def add_weights(request):
     context = {}
     template_name = 'levels/add_weights.html'
     context['levels'] = InputData.objects.all()
+    current_number_of_levels = InputData.objects.aggregate(level_count=Count('number_of_levels', distinct=True))
+    counts_ = current_number_of_levels['level_count']
+    data_structures = []
+    # print(request.is_ajax)
+    i = 0
+    while i <= counts_:
+        data_structures.append(
+            InputData.objects.filter(~Q(levelset_id=None) & Q(number_of_levels__exact=i) & Q(kpis=None)))
+        i = i + 1
+    # import pdb; pdb.set_trace()
+    # for i in data_structures:
+    context['data_str'] = list(itertools.chain.from_iterable(data_structures))
+    # import pdb; pdb.set_trace()
+    # if request.method == 'GET':
+    #     kpi_data = get_kpis(request.GET.get('data_str_id'))
+    #     return render(request,'levels/kpi_dropdown_list.html',{'kpi_data':kpi_data})
+    # redirect('add_kpi_weights')
+    if request.is_ajax:
+        context['kpi_data'] = InputData.objects.filter(name=request.GET.get('data_str'))
     form = KPIWeightForm(request.POST or None)
+    context['form'] = form
     # the computation algorithm for weight allocation in the specific levels
-    if form.is_valid():
-        # form.save()
-        for index in range(0, 1):
-            '''
-            Ensure index can be picked dynamically.
-            '''
-            index = pk
-            # form processing
-            if KPIWeightings.objects.filter(
-                    ~Q(content_id__levelset_id=None) & Q(content_id__number_of_levels__exact=index) & Q(
-                        created_at__gt=F('created_at') - timezone.timedelta(seconds=3))):
-                if request.POST.get('weight') == None:
-                    each_weight = 0
-                else:
-                    each_weight = request.POST.get('weight')
-                context['total_weight_0'] = KPIWeightings.objects.filter(
-                    ~Q(content_id__levelset_id=None) & Q(content_id__number_of_levels__exact=index) & Q(
-                        created_at__gt=F('created_at') - timezone.timedelta(seconds=3))).aggregate(
-                    Sum('weight'))
-                context['data'] = KPIWeightings.objects.filter(
-                    ~Q(content_id__levelset_id=None) & Q(content_id__number_of_levels__exact=index) & Q(
-                        created_at__gt=F('created_at') - timezone.timedelta(seconds=3))).values(
-                    "content_id__name").annotate(
-                    Count("content_id"),
-                    val=F('weight'), sum=Sum('weight'),
-                    content=F('content'),
-                    final_weight=F(
-                        'final_weight')).last()
-                dataset = KPIWeightings.objects.filter(
-                    ~Q(content_id__levelset_id=None) & Q(content_id__number_of_levels__exact=index) & Q(
-                        created_at__gt=F('created_at') - timezone.timedelta(seconds=3))).values(
-                    "content_id__name").annotate(Count("content_id"))
-                weight_set = []
-                for indexes in range(0, len(dataset)):
-                    weight_set.insert(indexes, KPIWeightings.objects.filter(
-                        content_id__name=dataset[indexes]['content_id__name']).values('weight').annotate(
-                        content=F('content_id__name'), contents=F('content_id')).order_by(
-                        'created_at').last())
-                context['weightings'] = weight_set
-                # performing the computations
-                import pandas as pd
-                values = pd.DataFrame(weight_set)
-                weights = values.weight
-                total_weight = weights.sum(axis=0)
-                context['totals'] = total_weight
-                percentage = (weights / total_weight) * 100
-                percentages = list(percentage)
-                data = zip(percentages, weight_set)
-                context['datasets'] = list(data)
-                # if request.method == 'POST':
-                # form = KPIWeightForm(request.POST or None
-                keyset = []
-                for key, val in values.contents.items():
-                    if val == int(request.POST.get('content')):
-                        keyset.append(int(key))
-                context['calculated_weight'] = (int(each_weight) / context['total_weight_0'][
-                    'weight__sum']) * 100
-                form.instance.final_weight = percentages[keyset[0]]
-        # weight filters
-        form.save()
+    # if form.is_valid():
+    # form.save()
+    # for index in range(0, 1):
+    ''' 
+    Ensure index can be picked dynamically.
+    '''
+    # form processing
+    # print(request.POST)
+    if request.method == 'POST':
+        # import  pdb; pdb.set_trace()
+        # print(request.POST)
+        # if form.is_valid():
+        # if request.POST.get('kpi_set') and request.POST.get('data_str'):
+        index = InputData.objects.filter(name=request.POST.get('kpi_set')).first().number_of_levels
+        level = InputData.objects.filter(name=request.POST.get('kpi_set')).first().levelset_id
+        kpi_pk = InputData.objects.filter(name=request.POST.get('kpi_set')).first().pk
+        pk = InputData.objects.filter(name=request.POST.get('data_str')).first().pk
+        effective_date = parse(request.POST.get('effective_date')).date()
+        weight = request.POST.get('weight')
+        kpis = request.POST.get('kpi_set')
+        KPIWeightings.objects.update_or_create(content_id=kpi_pk, kpis=kpis,
+                                               effective_date=effective_date,
+                                               weight=weight)
+        # print(index)
+        # import pdb;
+        # pdb.set_trace()
 
-    # environment_variables
-    # context['strategic_objectives'] = int(request.POST.get('content'))
-    # print(context['strategic_objectives'])
+        valid_data = KPIWeightings.objects.filter(
+            Q(content_id__levelset_id=level) & Q(content_id__number_of_levels__exact=index) & Q(
+                content_id__parent_id=pk))
+        if pk:
+            if request.POST.get('weight') == None:
+                each_weight = 0
+            else:
+                each_weight = request.POST.get('weight')
+            context['total_weight_0'] = KPIWeightings.objects.filter(
+                Q(content_id__levelset_id=level) & Q(content_id__number_of_levels__exact=index) & Q(
+                    content_id__parent_id=pk)
+            ).aggregate(
+                Sum('weight'))
+            context['data'] = KPIWeightings.objects.filter(
+                Q(content_id__levelset_id=level) & Q(content_id__number_of_levels__exact=index) & Q(
+                    content_id__parent_id=pk)
+            ).values(
+                "content_id__name").annotate(
+                Count("content_id"),
+                val=F('weight'), sum=Sum('weight'),
+                content=F('content'),
+                final_weight=F(
+                    'final_weight')).last()
+            dataset = KPIWeightings.objects.filter(
+                Q(content_id__levelset_id=level) & Q(content_id__number_of_levels__exact=index) & Q(
+                    content_id__parent_id=pk)).values(
+                "content_id__name").annotate(Count("content_id"))
+            weight_set = []
+            for indexes in range(0, len(dataset)):
+                weight_set.insert(indexes, KPIWeightings.objects.filter(
+                    content_id__name=dataset[indexes]['content_id__name']).values('weight').annotate(
+                    content=F('content_id__name')).order_by('-created_at').first())
+            context['weightings'] = weight_set
+            # import pdb; pdb.set_trace()
+            # performing the computations
+            import pandas as pd
+            values = pd.DataFrame(weight_set)
+            weights = values.weight
+            total_weight = weights.sum(axis=0)
+            context['totals'] = total_weight
+            percentage = (weights / total_weight) * 100
+            percentages = list(percentage)
+            data = zip(percentages, weight_set)
+            context['datasets'] = list(data)
+            # context['datasets'] = KPIWeightings.objects.filter(
+            #         content_id__name=dataset[0]['content_id__name']).order_by('-created_at').first()
+            # if request.method == 'POST':
+            # form = KPIWeightForm(request.POST or None
+            # import pdb; pdb.set_trace()
+            keyset = []
+            for key, val in values.content.items():
+                if val == str(request.POST.get('kpi_set')):
+                    keyset.append(int(key))
+
+            context['calculated_weight'] = (int(each_weight) / context['total_weight_0'][
+                'weight__sum']) * 100
+            # if dataset:
+            KPIWeightings.objects.update_or_create(content_id=kpi_pk, kpis=kpis,
+                                                   effective_date=effective_date,
+                                                   weight=weight, final_weight=percentages[keyset[0]])
+        # weight filters
+        # import pdb; pdb.set_trace()
+        # form.save()
+
+        # environment_variables
+        # context['strategic_objectives'] = int(request.POST.get('content'))
+        # print(context['strategic_objectives'])
     '''
     Ensure the weight_listing is sorted dynamically
     '''
-    # form = KPIWeightForm()
-    context['form'] = form
-    if pk == 0:
-        weight_list = KPIWeightings.objects.filter(
-            ~Q(content_id__levelset_id=None) & Q(content_id__number_of_levels__exact=pk)).order_by('-created_at')
-        weight_filter = WeightFilter(request.GET, queryset=weight_list)
-        context['filter'] = weight_filter
-    if pk == 1:
-        weight_list_1 = KPIWeightings.objects.filter(
-            ~Q(content_id__levelset_id=None) & Q(content_id__number_of_levels__exact=pk)).order_by('-created_at')
-        weight_filter = WeightFilter(request.GET, queryset=weight_list_1)
-        context['filter_1'] = weight_filter
-    if pk == 2:
-        weight_list_2 = KPIWeightings.objects.filter(
-            ~Q(content_id__levelset_id=None) & Q(content_id__number_of_levels__exact=pk)).order_by('-created_at')
-        weight_filter = WeightFilter(request.GET, queryset=weight_list_2)
-        context['filter_2'] = weight_filter
+    current_number_of_levels = InputData.objects.aggregate(level_count=Count('number_of_levels', distinct=True))
+    counts_ = current_number_of_levels['level_count']
+    range(0, counts_)
+
+    # import  pdb; pdb.set_trace()
+    # print('\n\n\n\n\n\n', request.POST, '\n\n\n\n\n\n\n\n\n')
+    # if request.is_ajax:
+    #     data = request.GET.get('content_id')
+    #     get = InputData.objects.filter(pk=data).first().number_of_levels
+    #     print(get)
+    #     if request.method == "POST":
+    #     pk = InputData.objects.filter(name=request.POST.get('kpi_set')).first().number_of_levels
+    #     context['form'] = form
+    #     if pk == 0:
+    #         weight_list = KPIWeightings.objects.filter(
+    #             ~Q(content_id__levelset_id=None) & Q(content_id__number_of_levels__exact=pk)).order_by('-created_at')
+    #         weight_filter = WeightFilter(request.GET, queryset=weight_list)
+    #         context['filter'] = weight_filter
+    #     if pk == 1:
+    #         weight_list_1 = KPIWeightings.objects.filter(
+    #             ~Q(content_id__levelset_id=None) & Q(content_id__number_of_levels__exact=pk)).order_by('-created_at')
+    #         weight_filter = WeightFilter(request.GET, queryset=weight_list_1)
+    #         context['filter_1'] = weight_filter
+    #     if pk == 2:
+    #         weight_list_2 = KPIWeightings.objects.filter(
+    #             ~Q(content_id__levelset_id=None) & Q(content_id__number_of_levels__exact=pk)).order_by('-created_at')
+    #         weight_filter = WeightFilter(request.GET, queryset=weight_list_2)
+    #         context['filter_2'] = weight_filter
     return render(request, template_name, context)
-    #
+
+
+#
+
+
+def get_kpisets(request):
+    context = {}
+    if request.method == 'GET':
+        context['kpi_data'] = get_kpis(request.GET.get('data_str'))
+    return render(request, 'levels/kpi_dropdown_list.html', context)
+
+

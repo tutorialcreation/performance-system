@@ -1,6 +1,6 @@
 {% load widget_tweaks %}
 
-<form method="post" action="" id="map_form" data-specific-maptype-url="{% url 'ajax_specific_maptype' %}">
+<form method="post">
     {% csrf_token %}
 
     <div class="modal-header">
@@ -37,19 +37,4 @@
 
 </form>
 <script>
-  $("#id_maptype_name").change(function(){
-    var url = $("#map_form").attr("data-specific-maptype-url"); // get the url of the specific maptype views
-    var maptypeId = $(this).val();  //get the selected maptype id from the html input
-
-    $.ajax({                          // initialize an ajax request
-      url:url,                        // set the url of the request
-      data:{
-        'maptype_data': maptypeId     // add the maptype id to the get parameters
-      },
-      success: function (data){       // data is the return of the specific maptype view
-        $("#id_maplist_name").html(data);  // replace contents of maptype with data that came from the server
-      }
-    });
-  });
-
 </script>

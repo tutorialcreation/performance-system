@@ -95,19 +95,19 @@ class KpiType(MainKpis, MPTTModel):
 
 
 class InputData(MainLevel, MPTTModel):
-    name = models.CharField(max_length=50, unique=False, null=True)
-    kpis = models.CharField(max_length=50, unique=False, null=True)
+    name = models.CharField(max_length=50, unique=False, null=True, blank=True)
+    kpis = models.CharField(max_length=50, unique=False, null=True, blank=True)
     data_name = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True)
     levelset = models.ForeignKey(Level, on_delete=models.SET_NULL, null=True, blank=True)
     parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True,
-                            related_name='children')
+                            related_name='children', verbose_name='Data Structure')
     kpitype = TreeForeignKey(KpiType, on_delete=models.CASCADE, null=True, blank=True,
                              related_name='kpitypes')
     weights = models.IntegerField(null=True)
-    value_date = ArrayField(models.DateTimeField(), null=True)
+    value_date = ArrayField(models.DateField(null=True, blank=True), null=True)
 
     # multiple_dates = ArrayField(models.DateTimeField(),null=True)
-    # multiple_dates = models.DateTimeField(null=True, blank=True)
+    # value_date = models.DateTimeField(null=True, blank=True)
 
     #
     # date_status = models.BooleanField(null=True,default=False)
@@ -124,9 +124,13 @@ class InputData(MainLevel, MPTTModel):
         level_attr = 'number_of_levels'
         order_insertion_by = ['name', 'kpis']
 
+class MyDates(models.Model):
+    value_date = ArrayField(models.DateField(null=True, blank=True), null=True)
+
+
 
 class InputDatas(MainLevel, MPTTModel):
-    name = models.CharField(max_length=50, unique=False, null=True)
+    name = models.CharField(max_length=50, unique=False, null=True, blank=True)
     kpis = models.CharField(max_length=50, unique=False, null=True)
     data_name = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True)
     levelset = models.ForeignKey(Level, on_delete=models.SET_NULL, null=True, blank=True)
@@ -135,7 +139,10 @@ class InputDatas(MainLevel, MPTTModel):
     kpitype = TreeForeignKey(KpiType, on_delete=models.CASCADE, null=True, blank=True,
                              related_name='kpitypeset')
     weights = models.IntegerField(null=True)
-    value_date = ArrayField(ArrayField(models.DateTimeField(), size=20), size=20)
+
+    # value_date = ArrayField(ArrayField(models.DateField(null=True), size=20), size=20)
+    value_date = models.DateField(null=True)
+
     # multiple_dates = ArrayField(models.DateTimeField(null=True), blank=True)
 
     # multiple_dates = models.DateTimeField(null=True, blank=True)
@@ -205,12 +212,13 @@ class KPIWeightings(KPIMain, MPTTModel):
     historical_date = models.DateTimeField(null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     weight = models.IntegerField(null=True)
+    kpis = models.CharField(max_length=200, null=True, blank=True)
     final_weight = models.FloatField("Calculated Percentage (%) ", null=True, blank=True)
     parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True,
                             related_name='children')
 
-    def __float__(self):
-        return self.weight
+    # def __float__(self):
+    # return self.final_weight
 
     class MPTTMeta:
         level_attr = 'kpi_levels'

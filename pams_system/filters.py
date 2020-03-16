@@ -1,5 +1,5 @@
 from pams_system.models.levels import KPIWeightings, KPIWeight, InputData
-from pams_system.models.kpis import KpiValue,KpiValueset
+from pams_system.models.kpis import KpiValue, KpiValueset, KpiStats
 import django_filters
 
 
@@ -13,7 +13,8 @@ class WeightFilter(django_filters.FilterSet):
             'effective_date': ['lte'],
         }
 
+
 class ValueFilter(django_filters.FilterSet):
     class Meta:
-        model = InputData
-        fields = ['name' ]
+        model = KpiStats
+        fields = ['data_str', 'kpis', ]

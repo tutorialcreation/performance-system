@@ -182,7 +182,6 @@ color: #9d9d9d;
                 </div>
                 {% endfor %}
                 {% endif %}
-
             </section>
         </section>
         <div class="row">
@@ -201,12 +200,12 @@ color: #9d9d9d;
                     </div>
                     <div class="table-responsive table-shadow">
                         <div class="row">
-                            <div class="col-md-9 float-left">
+                            <div class="col-md-8 float-left">
                                 <button class="create-kpi_value btn btn-info" type="button" name="button">
                                     <span class="fa fa-plus mr-2"></span>Assign a KPI VALUE to Individual
                                 </button>
                             </div>
-                            <div class="col-md-3 float-right">
+                            <div class="col-md-4 float-right">
                                 <button class="create_group_value btn btn-info" type="button" name="button">
                                     <span class="fa fa-plus mr-2"></span>Assign a KPI VALUE to Group
                                 </button>
@@ -228,7 +227,7 @@ color: #9d9d9d;
                                 <thead>
                                 <tr>
                                     <th class="text-center" scope="col">#</th>
-                                    <th class="text-center" scope="col">Individual</th>
+                                    <th class="text-center" scope="col">Individual/Group</th>
                                     <th class="text-center" scope="col">Value Date</th>
                                     <th class="text-center" scope="col">Value</th>
                                     <th class="text-center" scope="col">View Stats / Update / Delete</th>
@@ -238,7 +237,13 @@ color: #9d9d9d;
                                 {% for kpi_value in kpi_data_filters.qs %}
                                 <tr>
                                     <th class="text-center" scope="row">{{ forloop.counter }}</th>
+                                    {% if kpi_value.group %}
+                                    <td class="text-center">{{kpi_value.group}}</td>
+                                    {% elif kpi_value.individual %}
                                     <td class="text-center">{{ kpi_value.individual}}</td>
+                                    {% else %}
+                                    <td class="text-center">None</td>
+                                    {% endif %}
                                     <td class="text-center">{{ kpi_value.value_date }}</td>
                                     <td class="text-center">{{ kpi_value.value }}</td>
                                     <td class="text-center">
@@ -247,7 +252,7 @@ color: #9d9d9d;
                                         <!--                                            <span class="fa fa-eye"></span>-->
                                         <!--                                        </button>-->
                                         <button type="button" class="stats_summary btn btn-sm btn-primary"
-                                                data-id="{% url 'stats_summary' pk=kpi_value.pk tree_id=kpi_value.tree_id %}">
+                                                data-id="{% url 'stats_summary' kpi_value.pk %}">
                                             <span class="pe-7s-calculator"></span>
                                         </button>
                                         <button type="button" class="update-kpi_value btn btn-sm btn-primary"
@@ -272,21 +277,21 @@ color: #9d9d9d;
             </div>
             <!-- Pagination -->
             <div class="pagination">
-							    <span class="step-links">
-							        {% if maps.has_previous %}
-							            <a href="?page=1">&laquo; first</a>
-							            <a href="?page={{ maps.previous_page_number }}">previous</a>
-							        {% endif %}
+                <span class="step-links">
+                    {% if pagination.has_previous %}
+                    <a href="?page=1">&laquo; first</a>
+                    <a href="?page={{ pagination.previous_page_number }}">previous</a>
+                    {% endif %}
 
-							        <span class="current">
-							            Page {{ map.number }} of {{ map.paginator.num_pages }}.
-							        </span>
+                    <span class="current">
+                        Page {{ pagination.number }} of {{ pagination.paginator.num_pages }}.
+                    </span>
 
-							        {% if maps.has_next %}
-							            <a href="?page={{ maps.next_page_number }}">next</a>
-							            <a href="?page={{ maps.paginator.num_pages }}">last &raquo;</a>
-							        {% endif %}
-							    </span>
+                    {% if pagination.has_next %}
+                    <a href="?page={{ pagination.next_page_number }}">next</a>
+                    <a href="?page={{ pagination.paginator.num_pages }}">last &raquo;</a>
+                    {% endif %}
+                </span>
             </div>
             <!-- /pagination -->
 
@@ -345,6 +350,7 @@ $(function () {
                }
              });
           });
+
 
 </script>
 {% endblock extrascripts %}
