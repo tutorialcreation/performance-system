@@ -1,0 +1,394 @@
+{% extends '_layout.html' %}
+
+{% block title %} {{ title }} {% endblock %}
+
+{% block navheader %}
+{% include 'includes/navheader_employee_app.html' %}
+{% endblock %}
+
+
+{% block stylesheet %}
+.fa-eye,.fa-pencil{
+margin-right: 5px;
+}
+
+.table-shadow{
+background: white;
+padding: 2%;
+-webkit-box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(    0,0,0,0.2);
+box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);
+}
+
+
+h4{
+margin:2px 0 5px 0 !important;
+}
+
+
+.table-description{
+<!-- STYLE WITH GOOGLE FONT -->
+}
+
+.download-print-action{
+padding-bottom: 12px;
+}
+
+
+#override-start{
+background:none !important;
+top: 35% !important;
+right:13px;
+color:#000;
+font-size: 24px;
+
+}
+
+.alert-warning{
+background:#fd7b7b;
+}
+
+.alert-success {
+background-color: #82b72a;
+}
+
+.alert-success,.alert-warning{
+font-size:16px;
+}
+
+.sec-box{
+width:200px;
+height:80px;
+max-width:100%;
+line-height:80px;
+text-align:center;
+position:relative;
+
+font-size:1.9rem;
+
+-webkit-box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);
+box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);
+transition: all 400ms ease-in;
+
+font-variant: petite-caps;
+}
+
+
+.sec-box a{
+color:#fff;
+text-decoration:none;
+
+}
+
+
+.employee-box{
+background:#3f9a26;
+}
+
+
+.leave-box{
+background:#fff;
+
+}
+
+.leave-box a{
+color:#3ea7c7 !important;
+}
+
+
+.birthday-box{
+background:#8664ad;
+}
+
+.deleted-box{
+background:#d42828;
+}
+
+.company-box{
+background:#868686;
+}
+
+.margin-bottom{
+margin-bottom:1.4rem;
+}
+
+.count-object {
+position: absolute;
+top: 31%;
+right: 12px;
+font-size: 25px;
+font-weight: 100;
+font-variant: petite-caps;
+color: #f5f5f5;
+text-shadow:1px 1px rgba(8, 8, 8, 0.23);
+}
+
+.deprt{
+color:#4195bd !important;
+}
+
+
+#stylebutton{
+background: #60a0b3 !important;
+color: #fff !important;
+font-variant: petite-caps !important;
+font-size: 14px !important;
+}
+
+.input-group-btn + input:focus{
+outline:#60a0b3;
+}
+
+
+.total-leaves-count p{
+font-size: 14px;
+color: #9d9d9d;
+}
+
+
+{% endblock %}
+
+
+<!--CONTENTS-->
+{% block content %}
+
+{% include "_modal.html" %}
+<section class="content">
+    <section class="container-fluid">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                {% for object in kpi_users %}
+                {% if forloop.first %}
+                <li class="breadcrumb-item"><a href="#">{{object.maptype}}</a></li>
+                <li class="breadcrumb-item"><a href="#">{{object.maplist}}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{object.individual}}</li>
+                {% endif %}
+                {% endfor %}
+                 <button class="btn btn-success" style="float:right"><a href="{% url 'kpiValueIndex' %}">Assign values</a></button> 
+                <button class="btn btn-success" style="float:right; margin:2px;"><a href="{% url 'kpiGroupIndex' %}">Go To Groups</a></button>
+            </ol>
+        </nav>
+        <section class="row">
+            <section class="col col-sm-8 offset-sm-2">
+
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-success">
+                    {{ message }}
+                    <button type="button" class="close" id="override-start" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                {% endfor %}
+                {% endif %}
+
+            </section>
+        </section>
+        <div class="row">
+            <div class="col">
+
+                <div class="text-center table-description">
+                    <h4 class="title-h3" style="color: #60a0b3 !important;
+    						text-shadow: 1px 0px rgba(0,0,0,0.11)">KPI USER TABLES</h4>
+                </div>
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-lg-5">
+                            <button class="create-kpi_user btn btn-success" type="button" name="button">
+                                <span class="fa fa-plus"></span>Create a KPI User
+                            </button>
+                            <br>
+                        </div>
+                        <div class="col-lg-5">
+                            <button class="assign_kpi_user btn btn-success" type="button" name="button">
+                                <span class="fa fa-plus"></span>Assign User
+                            </button>
+                            <br>
+                        </div>
+                        <div class="col-lg-2 float-right">
+                            <a href="{% url 'kpiGroupIndex' %}"
+                               class="btn btn-success">View groups
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive table-shadow">
+                        {{message}}
+                        {% if kpi_users %}
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th class="text-center" scope="col">#</th>
+                                <th class="text-center" scope="col">User</th>
+                                <th class="text-center" scope="col">Read / Update / Delete</th>
+                                <th class="text-center" scope="col">Suspension status</th>
+                                <th class="text-center" scope="col">Join Group</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for kpi_user in kpi_users %}
+                            <tr>
+                                <th class="text-center" scope="row">{{ forloop.counter }}</th>
+                                <td class="text-center">{{ kpi_user.individual}}</td>
+                                <td class="text-center">
+                                    <button type="button" class="read-kpi_user btn btn-sm btn-success"
+                                            data-id="{% url 'read_kpi_user' kpi_user.pk %}">
+                                        <span class="fa fa-eye"></span>
+                                    </button>
+                                    <button type="button" class="update-kpi_user btn btn-sm btn-success"
+                                            data-id="{% url 'update_kpi_user' kpi_user.pk %}">
+                                        <span class="fa fa-pencil"></span>
+                                    </button>
+                                    <button type="button" class="delete-kpi_user btn btn-sm btn-danger"
+                                            data-id="{% url 'delete_kpi_user' kpi_user.pk %}">
+                                        <span class="fa fa-trash"></span>
+                                    </button>
+                                </td>
+                                {% if kpi_user.is_suspended == 1 %}
+                                <td class="text-center">
+                                    Suspended
+                                </td>
+                                {% elif kpi_user.is_suspended == 0 %}
+                                <td class="text-center">
+                                    Unsuspended
+                                </td>
+                                {% endif %}
+                                <td class="text-center">
+                                    <button type="button" class="update-kpi_user_group btn btn-sm btn-success"
+                                            data-id="{% url 'update_kpi_group_user' kpi_user.pk %}">
+                                        <span class="fa fa-plus mr-2"></span>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                        {% else %}
+                        <p class="no-kpi_users text-primary">No kpi_users added yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Pagination -->
+        <div class="pagination">
+            <span class="step-links">
+                {% if pagination.has_previous %}
+                <a href="?page=1">&laquo; first</a>
+                <a href="?page={{ pagination.previous_page_number }}">previous</a>
+                {% endif %}
+
+                <span class="current">
+                    Page {{ pagination.number }} of {{ pagination.paginator.num_pages }}.
+                </span>
+
+                {% if paginations.has_next %}
+                <a href="?page={{ pagination.next_page_number }}">next</a>
+                <a href="?page={{ pagination.paginator.num_pages }}">last &raquo;</a>
+                {% endif %}
+            </span>
+        </div>
+        <!-- /pagination -->
+
+    </section>
+</section>
+
+{% endblock content %}
+
+{% block extrascripts %}
+<script type="text/javascript">
+    $(function () {
+      // Create kpi_user button
+      $(".create-kpi_user").modalForm({formURL: "{% url 'create_kpi_user' %}"});
+      $(".assign_kpi_user").modalForm({formURL: "{% url 'assign_kpi_user' %}"});
+
+      // Update kpi_user buttons
+      $(".update-kpi_user").each(function () {
+        $(this).modalForm({formURL: $(this).data('id')});
+      });
+
+
+      // Update kpi_user buttons
+      $(".update-kpi_user_group").each(function () {
+        $(this).modalForm({formURL: $(this).data('id')});
+      });
+
+      // Read kpi_user buttons
+      $(".read-kpi_user").each(function () {
+        $(this).modalForm({formURL: $(this).data('id')});
+      });
+
+      // Delete kpi_user buttons
+      $(".delete-kpi_user").each(function () {
+        $(this).modalForm({formURL: $(this).data('id')});
+      })
+
+      // Hide message
+      $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+        $(".alert").slideUp(500);
+      });
+
+    });
+
+
+
+
+
+
+
+</script>
+{% endblock extrascripts %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

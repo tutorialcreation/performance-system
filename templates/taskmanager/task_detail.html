@@ -1,0 +1,99 @@
+{% extends '_layout.html' %}
+
+{% block navheader %}
+{% include 'includes/navheader_employee_app.html' %}
+{% endblock %}
+
+{% block content %}
+  <div class="w3-cell-row">
+    <div class="w3-card w3-container w3-cell w3-cell-middle w3-mobile">
+      <h2 class="w3-padding-16">{{ task.title }}</h2>
+
+      {% if task.desc %}
+        {{ task.desc|safe|urlize|linebreaks }}
+      {% endif %}
+
+      {# user having task assigned to and task creator can mark task as In-rogress or Completed #}
+      {% if user in task.assigned_to.all or user == task.creator %}
+        <div class="w3-bar w3-center">
+          {% if task.status == 'PLAN' and user in task.assigned_to.all %}
+            <a href="{% url 'taskmanager:task_accept' task.id %}">
+              <button class="w3-button w3-blue">Accept the Task</button>
+            </a>
+          {% endif %}
+          {% if task.status == 'PROG' %}
+            <a href="{% url 'taskmanager:task_mark_completed' task.id %}">
+              <button class="w3-button w3-blue w3-margin-bottom">Mark Completed</button>
+            </a>
+          {% endif %}
+
+          {# Only task creator can edit the task #}
+          {% if user == task.creator and task.status == 'PLAN' %}
+            <a href="{% url 'taskmanager:task_edit' task.id %}">
+              <button class="w3-button w3-green w3-margin-bottom w3-margin-top">Edit Task</button>
+            </a>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+
+  <div class="w3-card w3-container w3-cell w3-cell-middle w3-mobile">
+    <p class="w3-border-bottom"><strong>Created By : </strong><i>{{ task.creator }}</i></p>
+      <p class="w3-border-bottom">
+        <strong>Status : </strong>
+        <span class="w3-tag w3-blue w3-round-large">{{ task.get_status_display }}</span>
+      </p>
+      <p><strong>Assigned To : </strong>
+        <ul class="w3-ul w3-center">
+        {% for u in task.assigned_to.all %}
+          <li><i>{{ u }}</i></li>
+        {% endfor %}
+        </ul>
+      </p>
+      {% if task.team %}
+        <p class="w3-border-bottom"><strong>Assigned to team : </strong>
+          <a href="{{ task.team.get_absolute_url }}">{{ task.team }}</a>
+        </p>
+      {% endif %}
+      <p class="w3-border-bottom"><strong>Planned on : </strong>{{ task.planned_date }}</p>
+      <p class="w3-border-bottom"><strong>Due Date : </strong>{{ task.due_date }}</p>
+      {% if task.status == 'PROG' or task.status == 'COMP' %}
+        <p class="w3-border-bottom"><strong>Accepted on : </strong>{{ task.accepted_date }}</p>
+        <p class="w3-border-bottom"><strong>Accepted By : </strong>{{ task.accepted_by }}</p>
+      {% endif %}
+      {% if task.status == 'COMP' %}
+        <p class="w3-border-bottom"><strong>Completed on : </strong>{{ task.completed_date }}</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Comment form -->
+  <div class="w3-container">
+    <h5>Add comment:</h5>
+    <form action="{% url 'taskmanager:task_comment' task.id %}" method="post">
+      {% csrf_token %}
+      <textarea class="w3-input w3-border" name="comment_body" rows="3" placeholder="Write your comment here" required></textarea>
+      <input class="w3-button w3-wide w3-green w3-margin-top" type="submit" value="Add Comment">
+    </form>
+  </div>
+
+  <!-- Comment's section -->
+  <div class="w3-card w3-margin-top w3-container">
+    <h4><b>Comments on this task:</b></h4>
+    <hr>
+    {% for comment in task.comment_set.all %}
+      <p>
+        <b>
+          <i>{{ comment.author }}</i>,
+          {{ comment.time }}
+        </b>
+      </p>
+      {{ comment.body|safe|urlize|linebreaks }}
+      <hr>
+    {% empty %}
+    No Comments (yet).
+    <hr>
+    {% endfor %}
+  </div>
+
+{% endblock %}
