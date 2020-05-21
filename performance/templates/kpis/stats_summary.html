@@ -1,0 +1,77 @@
+{% extends '_layout.html' %}
+
+{% block title %} {{ title }} {% endblock %}
+{% load crispy_forms_tags %}
+{% block navheader %}
+{% include 'includes/navheader_employee_app.html' %}
+{% endblock %}
+
+
+{% block stylesheet %}
+
+
+
+{% endblock %}
+<!--CONTENTS-->
+{% block content %}
+<h3 class="modal-title">KPI Value Statistics</h3>
+<h4><strong>Individual and Group Statistics</strong></h4>
+<hr>
+<a href="{% url 'kpiValueIndex' %}">Go back</a>
+<form method="GET">
+    <label>Participants/Users</label>
+    <select name="kpi_set" id="id_kpi_set" class="form-control" required>
+        <option value="" selected>---------</option>
+        {% for object in kpi_users %}
+        <option value="{{object.individual}}">{{object.individual}}</option>
+        {% endfor %}
+    </select>
+    <label for="id_start_date">Start date:</label>
+    <input type="date" id="id_start_date" name="start_date" class="form-control">
+    <label for="id_end_date">End date:</label>
+    <input type="date" id="id_end_date" name="end_date" class="form-control">
+    <hr>
+    <input class="btn btn-success" type="submit" value="Compute" name="Submit">
+    <hr>
+</form>
+<ul>
+  <table class="table table-hover" id="dev-table">
+    <thead>
+      <tr>
+        <th>Value Date</th>
+        <th>Summation</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for object in summation %}
+      <tr>
+          <td>{{object.vdate}}</td>
+          <td>{{object.sum}}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% for object in member_ranking %}
+    {% if object.pk  == key %}
+    <p>Ranking  -- > {{forloop.counter}} with a value of -->   {{object.value|floatformat:3}}  </p>
+    {% endif %}
+    {% endfor %}
+</ul>
+{% comment %} <a href="{% url 'print_documents' %}"><button type="button" class="btn btn-success">Print Results</button></a> {% endcomment %}
+<script>
+      $("#id_kpi_set").change(function () {
+      var kpiUser = $(this).val();  // post the selected level ID from the HTML input
+
+      $.ajax({
+        url:"{% url 'stats_summary'  %}",                       // initialize an AJAX request
+        data: {
+          'kpi_users': kpiUser    // add the level id to the post parameters
+        },
+      });
+
+
+    });
+
+
+</script>
+{% endblock %}

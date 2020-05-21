@@ -1,0 +1,110 @@
+{% load widget_tweaks %}
+{% load crispy_forms_tags %}
+{% load crispy_forms_filters %}
+{% load l10n %}
+
+<form method="post" id="sublevelform" data-specific-maplist-url="{% url 'ajax_specific_maplist_data'%}" novalidate>
+    {% csrf_token %}
+
+    <div class="modal-header">
+        <h3 class="modal-title">Create Kpi</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+    <div class="modal-body">
+
+        <div class="{% if form.non_field_errors %}invalid{% endif %} mb-2">
+            {% for error in form.non_field_errors %}
+            {{ error }}
+            {% endfor %}
+        </div>
+
+        {% for field in form %}
+        <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {% render_field field class="form-control" placeholder=field.label %}
+            <div class="{% if field.errors %} invalid{% endif %}">
+                {% for error in field.errors %}
+                <p class="help-block">{{ error }}</p>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+        <!--    <div class="controls {{ field_class }}"{% if flat_attrs %} {{ flat_attrs|safe }}{% endif %}>-->
+        <!--        {% for choice_value, choice_instance in field.field.choices %}-->
+        <!--        <label class="form-check checkbox{% if inline_class%}-{{ inline_class }}{% endif %}level-{{ choice_instance.level }}">-->
+        <!--        <input type="checkbox" class="form-check-input"-->
+        <!--            {% if choice_value in field.value or choice_value|stringformat:'s' in field.value or choice_value|stringformat:'s' == field.value|stringformat:'s' %}-->
+        <!--            checked-->
+        <!--            {% endif %}-->
+        <!--            name="{{ field.html_name }}"-->
+        <!--            id="id_{{field.html_name}}_{{forloop.counter}}"-->
+        <!--            value="{{ choice_value|unlocalize }}"-->
+        <!--            {{ field.field.widget.attrs|flatatt }}>-->
+        <!--                <span>{{ choice_instance }}</span>-->
+        <!--        </label>-->
+        <!--        {% endfor %}-->
+        <!--        </div>-->
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="submit-btn btn btn-success">Create</button>
+    </div>
+
+</form>
+<script>
+     $("#id_maptype").change(function(){
+                 var url = $("#sublevelform").attr("data-specific-maplist-url"); // get the url of the specific maptype views
+                 var maptypeId = $(this).val();  //get the selected maptype id from the html input
+
+                 $.ajax({                          // initialize an ajax request
+                   url:url,                        // set the url of the request
+                   data:{
+                     'maptype_data': maptypeId     // add the maptype id to the get parameters
+                   },
+                   success: function (data){       // data is the return of the specific maptype view
+                     $("#id_maplist").html(data);  // replace contents of maptype with data that came from the server
+                   }
+                 });
+          });
+
+
+          $("#id_maptype").change(function () {
+                var url = $("#sublevelform").attr("data-specific-maplist-url");  // post the url of the `load_maplist_data` view
+                var maplistId = $(this).val();  // post the selected maplist ID from the HTML input
+
+                $.ajax({                       // initialize an AJAX request
+                  url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load/specific-maplist/)
+                  data: {
+                    'maplist_data': maplistId      // add the level id to the post parameters
+                  },
+
+                  success: function (data) {   // `data` is the return of the `load_sublevels` view function
+                    $("#id_levelset").html(data);  // replace the contents of the sublevel input with the data that came from the server
+                  }
+                });
+          });
+
+<!--          $("#id_main").change(function () {-->
+<!--                var url = $("#sublevelform").attr("data-specific-maplist-url");  // post the url of the `load_maplist_data` view-->
+<!--                var levelId = $(this).val();  // post the selected maplist ID from the HTML input-->
+
+<!--                $.ajax({                       // initialize an AJAX request-->
+<!--                  url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load/specific-maplist/)-->
+<!--                  data: {-->
+<!--                    'level_data': levelId      // add the level id to the post parameters-->
+<!--                  },-->
+
+<!--                  success: function (data) {   // `data` is the return of the `load_sublevels` view function-->
+<!--                    $("#id_name").html(data);  // replace the contents of the sublevel input with the data that came from the server-->
+<!--                  }-->
+<!--                });-->
+<!--          });-->
+
+
+    });
+
+
+</script>

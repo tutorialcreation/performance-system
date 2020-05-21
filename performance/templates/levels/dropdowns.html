@@ -1,0 +1,10 @@
+<option value="">---------</option>
+{% for object in parentset %}
+<option value="{{object.name}}">{{object.name}}</option>
+{% endfor %}
+
+<option value="">---------</option>
+{% for object in parentsets %}
+<option value="{{object.name}}">{{object.name}}</option>
+{% endfor %}
+

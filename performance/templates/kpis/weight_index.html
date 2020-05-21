@@ -1,0 +1,292 @@
+{% extends '_layout.html' %}
+
+{% block title %} {{ title }} {% endblock %}
+
+{% load crispy_forms_tags %}
+{% load mptt_tags %}
+{% block navheader %}
+{% include 'includes/navheader_employee_app.html' %}
+{% endblock %}
+
+
+{% block stylesheet %}
+
+#override-start{
+background:none !important;
+top: 35% !important;
+right:13px;
+color:#000;
+font-size: 24px;
+
+}
+
+.alert-warning{
+background:#fd7b7b;
+}
+
+.alert-success {
+background-color: #82b72a;
+}
+
+.alert-success,.alert-warning{
+font-size:16px;
+}
+
+
+.sec{
+border:1px solid yellow;
+background:red;
+}
+
+.form-wrapper{
+-webkit-box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);
+box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);
+padding: 2%;
+background:#fff !important;
+padding-bottom:5%;
+}
+
+.btn-lg{
+padding:8px 30px;
+
+}
+
+
+.main-panel > .content {
+padding: 60px 15px;
+min-height: calc(100% - 123px);
+
+
+{% endblock %}
+
+{% block content %}
+
+{% include "_modal.html" %}
+<section class="content">
+    <section class="container-fluid">
+
+        <section class="row">
+            <section class="col col-sm-8 offset-sm-2">
+
+                {% if messages %}
+                {% for message in messages %}
+                <div {% if message.tags %} class="{{ message.tags}}" {% endif %}>
+                    {{ message }}
+                    <button type="button" class="close" id="override-start" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                {% endfor %}
+                {% endif %}
+
+            </section>
+        </section>
+        <div class="row">
+            <div class="col">
+
+                <div class="text-center table-description">
+                    <h4 class="title-h3" style="color: #60a0b3 !important;
+    						text-shadow: 1px 0px rgba(0,0,0,0.11)">KPI WEIGHTS TABLES</h4>
+                </div>
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="download-print-action text-right">
+                            Download Excel | Pdf | Print <!-- Work on pdf and excel and print -->
+
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <button class="create-kpi_weight btn btn-success" type="button" name="button">
+                                <span class="fa fa-plus mr-2"></span>Assign a KPI WEIGHT
+                            </button>
+                            <br><br>
+                            <hr>
+                        </div>
+                        <div class="col-12 mb-3">
+              {% if kpi_weights %}
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th class="text-center" scope="col">#</th>
+                            <th class="text-center" scope="col">Weight</th>
+                            <th class="text-center" scope="col">Data</th>
+                            <th class="text-center" scope="col">Kpi Type</th>
+                            <th class="text-center" scope="col">Maplist</th>
+                            <th class="text-center" scope="col">Read / Update / Delete</th>
+                            <th class="text-center" scope="col">Add KPI Value</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for kpi_weight in kpi_weights %}
+                        <tr>
+                            <th class="text-center" scope="row">{{ forloop.counter }}</th>
+                            <td class="text-center">{{ kpi_weight.weight }}</td>
+                            <td class="text-center">{{ kpi_weight.data }}</td>
+                            <td class="text-center">{{ kpi_weight.kpitype }}</td>
+                            <td class="text-center">{{ kpi_weight.maplist }}</td>
+                            <td class="text-center">
+                                <button type="button" class="read-kpi_weight btn btn-sm btn-success"
+                                        data-id="{% url 'read_kpi_weight' kpi_weight.pk %}">
+                                    <span class="fa fa-eye"></span>
+                                </button>
+                                <button type="button" class="update-kpi_weight btn btn-sm btn-success"
+                                        data-id="{% url 'update_kpi_weight' kpi_weight.pk %}">
+                                    <span class="fa fa-pencil"></span>
+                                </button>
+                                <button type="button" class="delete-kpi_weight btn btn-sm btn-danger"
+                                        data-id="{% url 'delete_kpi_weight' kpi_weight.pk %}">
+                                    <span class="fa fa-trash"></span>
+                                </button>
+                            </td>
+                            <td class="text-center"><a
+                                            href="{% url 'kpiValueIndex' %}"
+                                            class="btn btn-sm btn-success">
+                                        <span class="fa fa-plus mr-2"></span>
+                                    </a>
+
+                                    </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p class="no-kpi_weights text-primary">No kpi_weights added yet.</p>
+                    {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Pagination -->
+        <div class="pagination">
+							    <span class="step-links">
+							        {% if maps.has_previous %}
+							            <a href="?page=1">&laquo; first</a>
+							            <a href="?page={{ maps.previous_page_number }}">previous</a>
+							        {% endif %}
+
+							        <span class="current">
+							            Page {{ map.number }} of {{ map.paginator.num_pages }}.
+							        </span>
+
+							        {% if maps.has_next %}
+							            <a href="?page={{ maps.next_page_number }}">next</a>
+							            <a href="?page={{ maps.paginator.num_pages }}">last &raquo;</a>
+							        {% endif %}
+							    </span>
+        </div>
+        <!-- /pagination -->
+
+    </section>
+</section>
+
+{% endblock content %}
+
+{% block extrascripts %}
+<script type="text/javascript">
+        $(function () {
+      // Create kpi_weight button
+      $(".create-kpi_weight").modalForm({formURL: "{% url 'create_kpi_weight' %}"});
+
+      // Update kpi_weight buttons
+      $(".update-kpi_weight").each(function () {
+        $(this).modalForm({formURL: $(this).data('id')});
+      });
+
+      // Read kpi_weight buttons
+      $(".read-kpi_weight").each(function () {
+        $(this).modalForm({formURL: $(this).data('id')});
+      });
+
+      // Delete kpi_weight buttons
+      $(".delete-kpi_weight").each(function () {
+        $(this).modalForm({formURL: $(this).data('id')});
+      })
+
+      // Hide message
+      $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+        $(".alert").slideUp(500);
+      });
+
+    });
+
+</script>
+{% endblock extrascripts %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,149 @@
+{% load widget_tweaks %}
+{% load mptt_tags %}
+
+<style>
+     .item {
+      width: 33%;
+      margin: 2px 1% 2px 1%;
+      border: 0;
+    }
+
+    .item li {
+      list-style: none;
+    }
+
+    .scrollable-dropdown-list{
+      position: absolute;
+      max-height:200px;
+      width:33%;
+      overflow-y:scroll;
+      overflow-x:auto;
+      margin: 0;
+      padding-left: 1em;
+      border-style: solid;
+      border-width: thin;
+      border-color: grey;
+      background-color: white;
+    }
+
+    legend {
+      margin-bottom: 0;
+      font-size: 18px;
+    }
+
+    label {
+      font-weight: normal;
+      margin-left:20px;
+    }
+
+    .help-block{
+      color:red;
+    }
+
+
+</style>
+<form method="post" id="sublevelform" data-specific-maplist-url="{% url 'ajax_specific_maplist_data' %}" novalidate>
+    {% csrf_token %}
+
+    <div class="modal-header">
+        <h3 class="modal-title">Create Level</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+    <div class="modal-body">
+
+        <div class="{% if form.non_field_errors %}invalid{% endif %} mb-2">
+            {% for error in form.non_field_errors %}
+            {{ error }}
+            {% endfor %}
+        </div>
+        {% for field in form %}
+        <div class="form-group">
+            {% if field.label_tag != 'maptype'%}
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {% render_field field class="form-control" placeholder=field.label %}
+            <div class="{% if field.errors %} invalid{% endif %}">
+                {% for error in field.errors %}
+                <p class="help-block">{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+        {% if check_data_str %}
+            <label for="id_parent_node">Previous Data Structure:</label>
+            <select name="parent_node" id="id_parent_node" class="form-control" required>
+                <option value="{{parentset}}" selected>{{parentset}}</option>
+            </select>
+        {% endif %}
+
+        {% if kpi_str %}
+        <div class="col-xs-12 ">
+            <div class="form-group ">
+                <label for="id_parent_node">Kpi Data Structure:</label>
+                <select name="parent_node" id="id_parent_node" class="form-control" required>
+                    <option value="{{parentsets}}" selected>{{parentsets}}</option>
+                </select>
+                <div class='input-group date' id='datepicker'>
+                    <input type="text" id="datetimepicker1" data-format="dd/MM/yyyy hh:mm:ss" class="form-control" placeholder="Value Date..."
+                           name="process_date"/> <span class="input-group-addon btn"><i
+                        class="glyphicon glyphicon-calendar"></i> </span>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+
+    <div class="modal-footer">
+        <button type="button" class="submit-btn btn btn-success">Create</button>
+    </div>
+</form>
+<script>
+
+// AJAX functions
+          $("#id_maptype").change(function(){
+                 var url = $("#sublevelform").attr("data-specific-maplist-url"); // get the url of the specific maptype views
+                 var maptypeId = $(this).val();  //get the selected maptype id from the html input
+
+                 $.ajax({                          // initialize an ajax request
+                   url:url,                        // set the url of the request
+                   data:{
+                     'maptype_data': maptypeId     // add the maptype id to the get parameters
+                   },
+                   success: function (data){
+                     //console.log("print");                               // data is the return of the specific maptype view
+                     $("#id_maplist").html(data);  // replace contents of maptype with data that came from the server
+                    //console.log("passed");
+                   }
+                 });
+          });
+
+
+          $("#id_maplist").change(function () {
+                var url = $("#sublevelform").attr("data-specific-maplist-url");  // post the url of the `load_maplist_data` view
+                var maplistId = $(this).val();  // post the selected maplist ID from the HTML input
+
+                $.ajax({                       // initialize an AJAX request
+                  url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load/specific-maplist/)
+                  data: {
+                    'maplist_data': maplistId      // add the level id to the post parameters
+                  },
+
+                  success: function (data) {   // `data` is the return of the `load_sublevels` view function
+                    //console.log("print");
+                    $("#id_levelset").html(data);  // replace the contents of the sublevel input with the data that came from the server
+                  }
+                });
+          });
+
+
+        $("#id_parent").change(function (e) {
+                e.preventDefault();
+          });
+
+        
+</script>

@@ -1,0 +1,42 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pylint = "*"
+autopep8 = "*"
+
+[packages]
+django = "*"
+django-bootstrap3-multidatepicker = "*"
+django-bootstrap-modal-forms = "*"
+django-bootstrap3 = "*"
+django-mptt = "*"
+django-crispy-forms = "*"
+djangorestframework = "*"
+django-widget-tweaks = "*"
+django-webpush = "*"
+django-mathfilters = "*"
+django-extensions = "*"
+django-select2 = "*"
+django-phonenumber-field = "*"
+psycopg2-binary = "*"
+phonenumbers = "*"
+pandas = "*"
+numpy = "*"
+sqlalchemy = "*"
+django-filters = "*"
+django-filter = "*"
+redis = "*"
+reportlab = "*"
+weasyprint = "*"
+coverage = "*"
+celery = "*"
+gunicorn = "*"
+django-heroku = "*"
+ipython = "*"
+notebook = "*"
+
+[requires]
+python_version = "3.6"

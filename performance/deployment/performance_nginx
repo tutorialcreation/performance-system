@@ -1,0 +1,40 @@
+upstream setup_server { 
+ # fail_timeout=0 means we always retry an upstream even if it failed 
+ # to return a good HTTP response (in case the Unicorn master nukes a 
+ # single worker for timing out). 
+
+ server localhost:8000 fail_timeout=0; 
+} 
+
+server { 
+
+   listen  8080; 
+    server_name [demo.com](http://demo.com); 
+    
+    large_client_header_buffers 4 16k;
+    client_max_body_size 4G; 
+
+    access_log /srv/www/html/performance_system/logs/nginx-access.log; 
+    error_log /srv/www/html/performance_system/logs/nginx-error.log; 
+	
+   location /static/ { 
+       alias   /srv/www/html/performance_system/static/; 
+   } 
+
+   location /media/ { 
+        alias  /srv/www/html/performance_system/media/; 
+   } 
+
+   location / { 
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; 
+        proxy_set_header Host $http_host; 
+        proxy_redirect off; 
+
+       # Try to serve static files from nginx, no point in making an 
+       # *application* server like Unicorn/Rainbows! serve static files. 
+       if (!-f $request_filename) { 
+            proxy_pass http://setup_server; 
+           break; 
+       } 
+   } 
+} 

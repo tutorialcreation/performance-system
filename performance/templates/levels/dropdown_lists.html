@@ -1,0 +1,13 @@
+<option value="">---------</option>
+{% for object in maptypes %}
+<option value="{{object.maplist_id}}">{{object.maplist_name}}</option>
+{% endfor %}
+{% for object in levelset %}
+<option value="{{object.main_id}}">{{object.name}}</option>
+{% endfor %}
+{% for object in data_str %}
+<option value="{{object.parent_id}}">{{object.parent}}</option>
+{% endfor %}
+<!--{% for object in data_str %}-->
+<!--<option value="{{object.parent_id}}">{{object.kpitype}}</option>-->
+<!--{% endfor %}-->

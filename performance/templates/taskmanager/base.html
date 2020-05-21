@@ -1,0 +1,71 @@
+{% load static %}
+{% load crispy_forms_tags %}
+<!DOCTYPE html>
+<html>
+  <head lang="en">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{% static 'taskmanager/w3.css' %}">
+    <link href="https://fonts.googleapis.com/css?family=Nunito&display=swap" rel="stylesheet">
+<!--    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">-->
+<!--    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+
+    <title>{% block title %}{% endblock %}</title>
+  </head>
+  <body>
+    <!-- Sidebar -->
+  <div class="w3-sidebar w3-bar-block w3-border-right w3-animate-left" style="display:none" id="mySidebar">
+    <button onclick="w3_close()" class="w3-bar-item w3-large">Close &times;</button>
+    {% if user.is_authenticated %}
+    {% load crispy_forms_tags %}
+      <strong class="w3-bar-item"><i>{{ user.username }}</i></strong>
+      <a href="{% url 'taskmanager:index' %}" class="w3-bar-item w3-button">Departments</a>
+      <a href="{% url 'taskmanager:task_my_tasks' %}" class="w3-bar-item w3-button">My Tasks</a>
+      <a href="{% url 'taskmanager:task_completed_tasks' %}" class="w3-bar-item w3-button">Completed Tasks</a>
+      <a href="{% url 'taskmanager:task_create' %}" class="w3-bar-item w3-button">Add a Task</a>
+      <a href="{% url 'taskmanager:team_create' %}" class="w3-bar-item w3-button">Create a Team</a>
+      <form method="get" action="{% url 'taskmanager:task_search' %}" class="w3-margin-top w3-margin-bottom">
+        <input type="text" name="q" class="w3-input w3-border" placeholder="Search task" required>
+        <input type="submit" value="Search" class="w3-button w3-grey w3-margin">
+      </form>
+      <a href="{% url 'taskmanager:logout' %}" class="w3-bar-item w3-button">LogOut</a>
+    {% else %}
+      <a href="{% url 'taskmanager:signup' %}" class="w3-bar-item w3-button">Sign Up</a>
+      <a href="{% url 'taskmanager:login' %}" class="w3-bar-item w3-button">Log In</a>
+    {% endif %}
+  </div>
+
+  <!-- Page Content -->
+  <div class="w3-teal">
+    <button class="w3-button w3-teal w3-xlarge" onclick="w3_open()">+</button>
+    <div class="w3-container">
+      <h1 style="text-shadow:1px 1px 0 #444; text-align:center;">Task Manager</h1>
+    </div>
+  </div>
+
+  <div class="w3-container">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="w3-panel w3-round-xlarge {% if message.tags == 'success' %}w3-pale-green{% else %}w3-pale-red{% endif %}" style="padding:10px">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+    {% block content %}{% endblock %}
+  </div>
+
+  <script>
+  function w3_open() {
+    document.getElementById("mySidebar").style.display = "block";
+  }
+  function w3_close() {
+    document.getElementById("mySidebar").style.display = "none";
+  }
+  </script>
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+  </body>
+</html>
